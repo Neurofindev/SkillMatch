@@ -1,0 +1,1583 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SkillMatch — Ta prochaine mission, à un swipe près.</title>
+<meta name="description" content="SkillMatch associe la simplicité d'une appli de rencontre à la rigueur d'un outil pro : contractualisation, paiement, réputation, suivi en temps réel." />
+
+<!-- Polices : Fraunces (serif éditorial), Inter (sans), IBM Plex Mono (mono) -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  /* ============================================================
+     TOKENS
+  ============================================================ */
+  :root{
+    /* Couleurs */
+    --bg:        #0B0C0A;
+    --light:     #F3EEE1;
+    --ink:       #14140F;
+    --accent:    #B6FF3C;   /* vert vif, usage parimonieux */
+    --accent-2:  #C1622D;   /* terracotta, illustrations */
+    --muted:     #8A877D;
+    --border:    rgba(243, 238, 225, 0.15);
+    --border-strong: rgba(243, 238, 225, 0.28);
+    --danger:    #FF5C5C;
+    --like:      #B6FF3C;
+
+    /* Typographies */
+    --serif: "Fraunces", Georgia, "Times New Roman", serif;
+    --sans:  "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --mono:  "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+
+    /* Espacements */
+    --side:    clamp(24px, 6vw, 100px);
+    --section: clamp(80px, 10vw, 160px);
+
+    /* Rayons */
+    --r-pill: 999px;
+    --r-card: 20px;
+
+    /* Header */
+    --header-h: 72px;
+
+    --ease: cubic-bezier(.2,.7,.2,1);
+  }
+
+  /* ============================================================
+     RESET / BASE
+  ============================================================ */
+  *,*::before,*::after{ box-sizing:border-box; margin:0; padding:0; }
+  html{ scroll-behavior:smooth; -webkit-text-size-adjust:100%; }
+  body{
+    background:var(--bg);
+    color:var(--light);
+    font-family:var(--sans);
+    font-size:16px;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
+    overflow-x:hidden;
+  }
+  body.cursor-ready{ cursor:none; }
+  body.cursor-ready a, body.cursor-ready button, body.cursor-ready .tilt-card{ cursor:none; }
+  img{ display:block; max-width:100%; }
+  a{ color:inherit; text-decoration:none; }
+  button{ font:inherit; color:inherit; background:none; border:0; cursor:pointer; }
+  ul{ list-style:none; }
+  ::selection{ background:var(--accent); color:var(--ink); }
+  .sr-only{ position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+
+  /* ============================================================
+     COMPOSANTS RÉUTILISABLES
+  ============================================================ */
+  .btn{
+    display:inline-flex; align-items:center; gap:.6em;
+    padding:.85em 1.5em; border-radius:var(--r-pill);
+    font-family:var(--sans); font-weight:500; font-size:.95rem;
+    letter-spacing:.01em; line-height:1;
+    border:1px solid transparent;
+    transition:transform .28s var(--ease), background .28s ease, color .28s ease, border-color .28s ease;
+    will-change:transform;
+  }
+  .btn:hover{ transform:translateY(-2px); }
+  .btn--light{ background:var(--light); color:var(--ink); }
+  .btn--light:hover{ background:#fff; }
+  .btn--dark{ background:var(--ink); color:var(--light); }
+  .btn--dark:hover{ background:#000; }
+  .btn--ghost{ border-color:var(--border-strong); color:var(--light); }
+  .btn--ghost:hover{ border-color:var(--light); }
+  .btn--accent{ background:var(--accent); color:var(--ink); }
+  .btn--sm{ padding:.6em 1.1em; font-size:.82rem; }
+
+  .tag{
+    display:inline-flex; align-items:center; gap:.5em;
+    padding:.45em .8em; border-radius:var(--r-pill);
+    font-family:var(--mono); font-size:.72rem; letter-spacing:.14em; text-transform:uppercase;
+    background:rgba(243,238,225,.08); color:var(--light);
+    border:1px solid var(--border); backdrop-filter:blur(6px);
+  }
+  .tag__dot{ width:6px; height:6px; border-radius:50%; background:var(--accent); }
+  .tag__dot--amber{ background:var(--accent-2); }
+
+  /* Carte capacité du carrousel */
+  .card-cap{
+    position:relative; flex:0 0 auto;
+    width:min(82vw, 560px); height:clamp(420px, 64vh, 620px);
+    border-radius:var(--r-card); overflow:hidden;
+    background:#16170f; scroll-snap-align:start;
+    border:1px solid var(--border); isolation:isolate;
+  }
+  .card-cap__media{ position:absolute; inset:0; background-size:cover; background-position:center; transition:transform .8s var(--ease); z-index:-2; }
+  .card-cap:hover .card-cap__media{ transform:scale(1.03); }
+  .card-cap__shade{ position:absolute; inset:0; background:linear-gradient(180deg, rgba(11,12,10,.15) 0%, rgba(11,12,10,.25) 35%, rgba(11,12,10,.92) 100%); z-index:-1; }
+  .card-cap__top{ position:absolute; top:24px; left:24px; right:24px; display:flex; align-items:center; justify-content:space-between; }
+  .card-cap__body{ position:absolute; left:24px; right:24px; bottom:26px; }
+  .card-cap__title{ font-family:var(--serif); font-weight:500; font-size:clamp(1.5rem,2.4vw,2rem); line-height:1.08; letter-spacing:-.01em; max-width:30ch; }
+  .card-cap__arrow{ margin-top:18px; display:inline-flex; align-items:center; gap:.5em; font-family:var(--mono); font-size:.78rem; letter-spacing:.12em; text-transform:uppercase; color:var(--accent); }
+
+  /* ============================================================
+     CURSEUR PERSONNALISÉ
+  ============================================================ */
+  .cursor-dot, .cursor-ring{
+    position:fixed; top:0; left:0; pointer-events:none; z-index:9999;
+    border-radius:50%; transform:translate(-50%,-50%);
+    mix-blend-mode:difference;
+  }
+  .cursor-dot{ width:6px; height:6px; background:var(--light); }
+  .cursor-ring{
+    width:38px; height:38px; border:1px solid rgba(243,238,225,.6);
+    transition:width .25s var(--ease), height .25s var(--ease), background .25s ease, border-color .25s ease;
+  }
+  .cursor-ring.is-hover{ width:64px; height:64px; background:rgba(182,255,60,.12); border-color:var(--accent); }
+  .cursor-ring.is-down{ width:30px; height:30px; }
+  @media (hover:none),(pointer:coarse){ .cursor-dot,.cursor-ring{ display:none; } body.cursor-ready{ cursor:auto; } }
+
+  /* ============================================================
+     BARRE DE PROGRESSION DE SCROLL
+  ============================================================ */
+  .scroll-progress{
+    position:fixed; top:0; left:0; height:2px; width:0%;
+    background:var(--accent); z-index:300;
+  }
+
+  /* ============================================================
+     HEADER
+  ============================================================ */
+  .site-header{
+    position:fixed; top:0; left:0; right:0; height:var(--header-h); z-index:100;
+    display:flex; align-items:center; padding:0 var(--side);
+    transition:background .3s ease, border-color .3s ease, backdrop-filter .3s ease;
+    border-bottom:1px solid transparent;
+  }
+  .site-header.is-scrolled{ background:rgba(11,12,10,.85); backdrop-filter:blur(14px); border-bottom-color:var(--border); }
+  .site-header__inner{ width:100%; display:flex; align-items:center; justify-content:space-between; }
+  .brand{ display:flex; align-items:center; gap:.55rem; font-family:var(--serif); font-weight:600; font-size:1.35rem; letter-spacing:-.01em; }
+  .brand__mark{ width:30px; height:30px; border-radius:8px; display:grid; place-items:center; background:var(--accent); color:var(--ink); }
+  .brand__mark svg{ width:17px; height:17px; }
+
+  .site-nav{ display:flex; align-items:center; gap:14px; }
+  .icon-btn{
+    width:40px; height:40px; border-radius:50%; display:grid; place-items:center;
+    border:1px solid var(--border); color:var(--light);
+    transition:background .25s ease, border-color .25s ease;
+  }
+  .icon-btn:hover{ background:rgba(243,238,225,.08); border-color:var(--border-strong); }
+  .icon-btn svg{ width:18px; height:18px; }
+  .menu-toggle{ display:none; }
+  @media (max-width:860px){
+    .site-nav .btn{ display:none; }
+    .menu-toggle{ display:grid; }
+  }
+  @media (max-width:520px){
+    .site-nav .icon-btn--search{ display:none; }
+  }
+
+  /* Overlay recherche */
+  .search-overlay{
+    position:fixed; inset:0 0 auto 0; z-index:250;
+    background:rgba(11,12,10,.97); backdrop-filter:blur(16px);
+    padding:calc(var(--header-h) + 24px) var(--side) 40px;
+    transform:translateY(-110%); transition:transform .45s var(--ease);
+    border-bottom:1px solid var(--border);
+  }
+  .search-overlay.is-open{ transform:translateY(0); }
+  .search-overlay__close{ position:absolute; top:18px; right:var(--side); width:44px; height:44px; border-radius:50%; display:grid; place-items:center; border:1px solid var(--border); }
+  .search-overlay form{ max-width:760px; margin:0 auto; }
+  .search-overlay label{ font-family:var(--mono); font-size:.72rem; letter-spacing:.16em; text-transform:uppercase; color:var(--muted); }
+  .search-overlay input{
+    width:100%; margin-top:14px; background:transparent; border:0; border-bottom:1px solid var(--border-strong);
+    color:var(--light); font-family:var(--serif); font-weight:500; font-size:clamp(1.6rem,5vw,2.6rem); padding:8px 0;
+  }
+  .search-overlay input:focus{ outline:none; border-bottom-color:var(--accent); }
+  .search-overlay__suggestions{ max-width:760px; margin:24px auto 0; display:flex; flex-wrap:wrap; gap:8px; }
+  .search-overlay__suggestions button{ font-family:var(--mono); font-size:.72rem; letter-spacing:.1em; text-transform:uppercase; padding:.5em .9em; border-radius:var(--r-pill); border:1px solid var(--border); color:var(--muted); transition:.2s; }
+  .search-overlay__suggestions button:hover{ color:var(--light); border-color:var(--border-strong); }
+
+  /* Panneau menu mobile */
+  .mobile-menu{
+    position:fixed; inset:0; background:var(--bg); z-index:200;
+    transform:translateY(-100%); transition:transform .55s var(--ease);
+    display:flex; flex-direction:column; padding:0;
+    overflow:hidden;
+  }
+  .mobile-menu.is-open{ transform:translateY(0); }
+  .mobile-menu__close{ position:absolute; top:18px; right:var(--side); width:44px; height:44px; border-radius:50%; display:grid; place-items:center; border:1px solid var(--border); z-index:10; }
+
+  /* Contenu scrollable du menu */
+  .mobile-menu__body{
+    flex:1; overflow-y:auto; overscroll-behavior:contain;
+    padding:calc(var(--header-h) + 32px) var(--side) var(--side);
+    display:flex; flex-direction:column;
+  }
+
+  /* Brand en haut du menu */
+  .mobile-menu__brand{
+    margin-bottom:36px;
+    opacity:0; transform:translateY(16px);
+    transition:opacity .5s var(--ease) .08s, transform .5s var(--ease) .08s;
+  }
+  .mobile-menu.is-open .mobile-menu__brand{ opacity:1; transform:none; }
+  .mobile-menu__brand .brand{ font-size:1.5rem; }
+  .mobile-menu__brand-tag{
+    display:inline-flex; align-items:center; gap:.45em;
+    margin-top:8px; font-family:var(--mono); font-size:.68rem;
+    letter-spacing:.14em; text-transform:uppercase; color:var(--muted);
+  }
+  .mobile-menu__brand-tag .tag__dot{ width:5px; height:5px; border-radius:50%; background:var(--accent); }
+
+  /* Navigation principale */
+  .mobile-menu nav{ display:flex; flex-direction:column; gap:0; margin-bottom:36px; }
+  .mobile-menu nav a{
+    font-family:var(--serif); font-weight:500; font-size:clamp(2rem,9vw,3rem); line-height:1.15; padding:.3em 0;
+    border-bottom:1px solid var(--border);
+    opacity:0; transform:translateY(24px);
+    transition:opacity .55s var(--ease), transform .55s var(--ease), color .25s ease, padding-left .35s var(--ease);
+    position:relative;
+  }
+  .mobile-menu nav a::before{
+    content:""; position:absolute; left:0; top:50%; transform:translateY(-50%);
+    width:0; height:3px; border-radius:3px; background:var(--accent);
+    transition:width .4s var(--ease);
+  }
+  .mobile-menu nav a:hover{ color:var(--accent); padding-left:12px; }
+  .mobile-menu nav a:hover::before{ width:8px; }
+  .mobile-menu.is-open nav a{ opacity:1; transform:none; }
+  .mobile-menu.is-open nav a:nth-child(1){ transition-delay:.14s; }
+  .mobile-menu.is-open nav a:nth-child(2){ transition-delay:.22s; }
+  .mobile-menu.is-open nav a:nth-child(3){ transition-delay:.30s; }
+  .mobile-menu.is-open nav a:nth-child(4){ transition-delay:.38s; }
+
+  /* CTA principal du menu */
+  .mobile-menu__cta{
+    margin-bottom:36px;
+    opacity:0; transform:translateY(20px);
+    transition:opacity .55s var(--ease) .46s, transform .55s var(--ease) .46s;
+  }
+  .mobile-menu.is-open .mobile-menu__cta{ opacity:1; transform:none; }
+  .mobile-menu__cta .btn{ width:100%; justify-content:center; padding:1em 1.5em; font-size:1rem; }
+
+  /* Contacts dans le menu */
+  .mobile-menu__contacts{
+    padding-top:28px; border-top:1px solid var(--border);
+    opacity:0; transform:translateY(20px);
+    transition:opacity .55s var(--ease) .52s, transform .55s var(--ease) .52s;
+  }
+  .mobile-menu.is-open .mobile-menu__contacts{ opacity:1; transform:none; }
+  .mobile-menu__contacts-label{
+    font-family:var(--mono); font-size:.64rem; letter-spacing:.16em;
+    text-transform:uppercase; color:var(--muted); margin-bottom:16px;
+  }
+  .mobile-menu__contacts-list{ display:flex; flex-direction:column; gap:14px; }
+  .mobile-menu__contacts-item{
+    display:flex; align-items:center; gap:14px;
+    padding:12px 16px; border-radius:14px; border:1px solid var(--border);
+    background:rgba(243,238,225,.03);
+    transition:background .3s ease, border-color .3s ease, color .3s ease;
+  }
+  .mobile-menu__contacts-item:hover{
+    background:rgba(243,238,225,.06); border-color:var(--border-strong); color:var(--accent);
+  }
+  .mobile-menu__contacts-item:active{
+    transform:scale(.98);
+  }
+  .mobile-menu__contacts-icon{
+    width:40px; height:40px; border-radius:50%; flex:0 0 auto;
+    display:grid; place-items:center;
+    background:rgba(182,255,60,.08); border:1px solid rgba(182,255,60,.15);
+    color:var(--accent);
+  }
+  .mobile-menu__contacts-icon svg{ width:16px; height:16px; }
+  .mobile-menu__contacts-text{ min-width:0; }
+  .mobile-menu__contacts-text span{ display:block; }
+  .mobile-menu__contacts-text small{
+    font-family:var(--mono); font-size:.6rem; letter-spacing:.1em;
+    text-transform:uppercase; color:var(--muted); margin-top:2px;
+  }
+
+  /* Réseaux sociaux dans le menu */
+  .mobile-menu__socials{
+    margin-top:28px;
+    opacity:0; transform:translateY(20px);
+    transition:opacity .55s var(--ease) .58s, transform .55s var(--ease) .58s;
+  }
+  .mobile-menu.is-open .mobile-menu__socials{ opacity:1; transform:none; }
+  .mobile-menu__socials-label{
+    font-family:var(--mono); font-size:.64rem; letter-spacing:.16em;
+    text-transform:uppercase; color:var(--muted); margin-bottom:14px;
+  }
+  .mobile-menu__socials-links{ display:flex; gap:12px; }
+  .mobile-menu__socials-links a{
+    width:44px; height:44px; border-radius:50%;
+    border:1px solid var(--border); display:grid; place-items:center;
+    transition:background .25s ease, border-color .25s ease, color .25s ease;
+  }
+  .mobile-menu__socials-links a:hover{ background:rgba(243,238,225,.08); border-color:var(--border-strong); color:var(--accent); }
+  .mobile-menu__socials-links a svg{ width:16px; height:16px; }
+
+  /* ============================================================
+     HERO
+  ============================================================ */
+  .hero{ position:relative; min-height:100svh; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; padding:0 var(--side); overflow:hidden; }
+  .hero__media{ position:absolute; inset:0; background-image:url("https://picsum.photos/seed/skillmatch-hero-city/1920/1280"); background-size:cover; background-position:center; will-change:transform; z-index:-2; }
+  .hero__shade{ position:absolute; inset:0; background:radial-gradient(120% 90% at 50% 40%, rgba(11,12,10,.35) 0%, rgba(11,12,10,.75) 60%, rgba(11,12,10,.95) 100%), linear-gradient(180deg, rgba(11,12,10,.55) 0%, rgba(11,12,10,0) 30%, rgba(11,12,10,.85) 100%); z-index:-1; }
+  .hero__eyebrow{ margin-bottom:28px; opacity:0; transform:translateY(20px); animation:fadeUp .9s .15s ease forwards; }
+  .hero h1{ font-family:var(--serif); font-weight:500; font-size:clamp(2.5rem,6vw,4.5rem); line-height:1.02; letter-spacing:-.02em; max-width:18ch; opacity:0; transform:translateY(24px); animation:fadeUp 1s .3s ease forwards; }
+  .hero h1 .rot{ display:inline-block; color:var(--accent); font-style:italic; font-weight:400; position:relative; min-width:3.2ch; text-align:left; }
+  .hero__cta{ margin-top:36px; display:flex; gap:14px; flex-wrap:wrap; justify-content:center; opacity:0; transform:translateY(24px); animation:fadeUp 1s .5s ease forwards; }
+  .hero__scroll{ position:absolute; bottom:26px; left:50%; transform:translateX(-50%); display:flex; flex-direction:column; align-items:center; gap:8px; font-family:var(--mono); font-size:.68rem; letter-spacing:.2em; text-transform:uppercase; color:var(--muted); opacity:0; animation:fadeUp 1s .9s ease forwards; }
+  .hero__scroll svg{ width:22px; height:22px; animation:bob 2s ease-in-out infinite; }
+  @keyframes bob{ 0%,100%{transform:translateY(0)} 50%{transform:translateY(5px)} }
+  @keyframes fadeUp{ to{opacity:1; transform:translateY(0)} }
+
+  /* ============================================================
+     SECTIONS GÉNÉRIQUES
+  ============================================================ */
+  section{ padding-block:var(--section); }
+  .container{ max-width:1400px; margin:0 auto; padding-inline:var(--side); }
+  .section-head{ display:flex; align-items:flex-end; justify-content:space-between; gap:24px; margin-bottom:clamp(32px,5vw,64px); }
+  .section-head h2{ font-family:var(--serif); font-weight:500; font-size:clamp(1.9rem,4vw,3rem); line-height:1.05; letter-spacing:-.02em; max-width:16ch; }
+  .section-head p{ color:var(--muted); max-width:42ch; }
+  .reveal{ opacity:0; transform:translateY(24px); transition:opacity .8s var(--ease), transform .8s var(--ease); }
+  .reveal.is-visible{ opacity:1; transform:none; }
+
+  /* ============================================================
+     CARROUSEL "CAPACITÉS"
+  ============================================================ */
+  .capabilities{ padding-top:var(--section); padding-bottom:var(--section); }
+  .capabilities .section-head{ padding-inline:var(--side); max-width:1400px; margin-inline:auto; }
+  .carousel-wrap{ position:relative; }
+  .carousel{
+    display:flex; gap:20px; overflow-x:auto; scroll-snap-type:x mandatory;
+    padding-block:8px; padding-left:calc((100vw - 1400px)/2 + var(--side)); padding-right:var(--side);
+    scrollbar-width:none; cursor:grab;
+  }
+  .carousel::-webkit-scrollbar{ display:none; }
+  .carousel.is-dragging{ cursor:grabbing; scroll-snap-type:none; }
+  .carousel.is-dragging .card-cap{ pointer-events:none; }
+  .card-cap:last-child{ margin-right:calc(100vw - 560px - var(--side) - 160px); }
+  @media (max-width:1100px){ .carousel{ padding-left:var(--side); } .card-cap:last-child{ margin-right:var(--side); } }
+  /* Barre de progression du carrousel */
+  .carousel-progress{ max-width:1400px; margin:28px auto 0; padding-inline:var(--side); display:flex; align-items:center; gap:16px; }
+  .carousel-progress__track{ flex:1; height:2px; background:var(--border); border-radius:2px; overflow:hidden; }
+  .carousel-progress__bar{ height:100%; width:25%; background:var(--accent); border-radius:2px; transition:width .15s linear; }
+  .carousel-progress__count{ font-family:var(--mono); font-size:.72rem; letter-spacing:.12em; color:var(--muted); white-space:nowrap; }
+
+  /* ============================================================
+     SECTION DÉMO INTERACTIVE
+  ============================================================ */
+  .demo{ border-top:1px solid var(--border); }
+  .demo__grid{ display:grid; grid-template-columns:1fr 1fr; gap:clamp(20px,3vw,40px); align-items:stretch; }
+  @media (max-width:980px){ .demo__grid{ grid-template-columns:1fr; } }
+  .demo-panel{ border:1px solid var(--border); border-radius:var(--r-card); padding:clamp(24px,3vw,40px); display:flex; flex-direction:column; background:linear-gradient(165deg,#131410 0%,#0c0d0a 100%); overflow:hidden; }
+  .demo-panel__head{ display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:clamp(20px,3vw,28px); }
+  .demo-panel__head h3{ font-family:var(--serif); font-weight:500; font-size:clamp(1.3rem,2.2vw,1.7rem); letter-spacing:-.01em; }
+  .demo-panel__hint{ font-family:var(--mono); font-size:.68rem; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); }
+
+  /* --- Démo SWIPE --- */
+  .swipe-stage{ position:relative; height:380px; display:grid; place-items:center; user-select:none; touch-action:none; }
+  .swipe-card{
+    position:absolute; width:min(78%,300px); height:340px; border-radius:18px; overflow:hidden;
+    background:#1a1b14; border:1px solid var(--border);
+    box-shadow:0 1px 0 rgba(255,255,255,.04) inset;
+    will-change:transform, opacity;
+    display:flex; flex-direction:column;
+  }
+  .swipe-card__photo{ height:54%; background-size:cover; background-position:center; position:relative; }
+  .swipe-card__photo::after{ content:""; position:absolute; inset:0; background:linear-gradient(180deg,transparent 40%,rgba(11,12,10,.6)); }
+  .swipe-card__verified{ position:absolute; top:12px; right:12px; z-index:2; background:var(--accent); color:var(--ink); width:24px; height:24px; border-radius:50%; display:grid; place-items:center; }
+  .swipe-card__verified svg{ width:14px; height:14px; }
+  .swipe-card__body{ flex:1; padding:16px 18px; display:flex; flex-direction:column; justify-content:space-between; }
+  .swipe-card__name{ font-family:var(--serif); font-weight:600; font-size:1.25rem; }
+  .swipe-card__name span{ color:var(--muted); font-weight:400; font-size:.85rem; font-family:var(--sans); }
+  .swipe-card__mission{ font-size:.86rem; color:var(--light); opacity:.85; margin-top:4px; }
+  .swipe-card__meta{ display:flex; gap:14px; margin-top:10px; font-family:var(--mono); font-size:.7rem; letter-spacing:.06em; color:var(--muted); }
+  .swipe-card__meta b{ color:var(--accent); font-weight:500; }
+  /* Badges LIKE / NOPE */
+  .swipe-stamp{ position:absolute; top:24px; padding:.35em .8em; border-radius:10px; font-family:var(--mono); font-size:1rem; font-weight:600; letter-spacing:.08em; opacity:0; border:3px solid; z-index:3; }
+  .swipe-stamp--like{ left:22px; color:var(--like); border-color:var(--like); transform:rotate(-14deg); }
+  .swipe-stamp--nope{ right:22px; color:var(--danger); border-color:var(--danger); transform:rotate(14deg); }
+  .swipe-card[data-verdict="like"] .swipe-stamp--like{ opacity:1; }
+  .swipe-card[data-verdict="nope"] .swipe-stamp--nope{ opacity:1; }
+
+  .swipe-controls{ display:flex; align-items:center; justify-content:center; gap:18px; margin-top:22px; }
+  .swipe-btn{ width:54px; height:54px; border-radius:50%; border:1px solid var(--border-strong); display:grid; place-items:center; transition:transform .2s var(--ease), background .2s, border-color .2s; }
+  .swipe-btn:hover{ transform:scale(1.08); }
+  .swipe-btn:active{ transform:scale(.94); }
+  .swipe-btn--nope:hover{ background:rgba(255,92,92,.12); border-color:var(--danger); color:var(--danger); }
+  .swipe-btn--like:hover{ background:rgba(182,255,60,.12); border-color:var(--accent); color:var(--accent); }
+  .swipe-btn--like.is-liked{
+    background:rgba(255,92,92,.15); border-color:var(--danger); color:var(--danger);
+    animation:heartPop .4s var(--ease);
+  }
+  @keyframes heartPop{
+    0%{ transform:scale(1); }
+    30%{ transform:scale(1.22); }
+    60%{ transform:scale(.94); }
+    100%{ transform:scale(1); }
+  }
+  .swipe-btn svg{ width:22px; height:22px; }
+  .swipe-tally{ display:flex; gap:18px; font-family:var(--mono); font-size:.72rem; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin-top:16px; justify-content:center; }
+  .swipe-tally b{ font-size:1.1rem; color:var(--light); }
+
+  /* --- Démo TRACKER --- */
+
+  /* Carte d'info mission (prestataire + prix + ETA) */
+  .tracker-card{
+    display:flex; align-items:center; gap:14px;
+    padding:14px; border-radius:14px; border:1px solid var(--border);
+    background:linear-gradient(120deg,#15160f,#0c0d0a);
+    margin-bottom:16px;
+  }
+  .tracker-card__avatar{
+    width:48px; height:48px; border-radius:50%; flex:0 0 auto;
+    background:url('https://picsum.photos/seed/skillmatch-courier/120/120') center/cover, #1a1b14;
+    border:2px solid var(--border-strong); position:relative;
+  }
+  .tracker-card__avatar::after{
+    content:""; position:absolute; right:-2px; bottom:-2px;
+    width:14px; height:14px; border-radius:50%; background:var(--accent);
+    border:2px solid #0c0d0a;
+  }
+  .tracker-card__info{ flex:1; min-width:0; }
+  .tracker-card__name{ font-family:var(--serif); font-weight:600; font-size:1.05rem; line-height:1.2; }
+  .tracker-card__mission{ font-size:.8rem; color:var(--muted); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .tracker-card__price{ font-family:var(--mono); font-size:.8rem; color:var(--accent); margin-top:5px; letter-spacing:.04em; }
+  .tracker-eta-box{ display:flex; flex-direction:column; align-items:flex-end; flex:0 0 auto; line-height:1; }
+  .tracker-eta-box__num{ font-family:var(--serif); font-weight:600; font-size:1.7rem; color:var(--accent); transition:opacity .3s ease; }
+  .tracker-eta-box__num.is-changed{ animation:etaPop .5s var(--ease); }
+  @keyframes etaPop{ 0%{ transform:translateY(6px); opacity:0; } 100%{ transform:none; opacity:1; } }
+  .tracker-eta-box__lbl{ font-family:var(--mono); font-size:.6rem; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin-top:5px; }
+
+  /* Barre de progression horizontale globale */
+  .tracker-bar{ height:4px; border-radius:4px; background:var(--border); overflow:hidden; margin-bottom:26px; }
+  .tracker-bar__fill{ height:100%; width:0%; background:linear-gradient(90deg,var(--accent-2),var(--accent)); border-radius:4px; transition:width 1.4s var(--ease); }
+
+  /* Stepper vertical */
+  .tracker-steps{ position:relative; }
+  .tracker-rail{ position:absolute; left:13px; top:0; bottom:0; width:2px; background:var(--border); border-radius:2px; overflow:hidden; }
+  .tracker-rail__fill{ position:absolute; left:0; top:0; width:100%; height:0%; background:var(--accent); transition:height 1.1s var(--ease); }
+  .tracker-step{ position:relative; display:flex; gap:16px; padding:10px 0; }
+  .tracker-step__dot{
+    flex:0 0 auto; width:28px; height:28px; border-radius:50%;
+    border:2px solid var(--border-strong); background:var(--bg);
+    display:grid; place-items:center; z-index:1; position:relative;
+    transition:border-color .45s var(--ease), background .45s var(--ease), box-shadow .45s var(--ease);
+  }
+  .tracker-step.is-active .tracker-step__dot{ border-color:var(--accent); box-shadow:0 0 0 5px rgba(182,255,60,.14); }
+  .tracker-step.is-active .tracker-step__dot::after{ content:""; position:absolute; inset:5px; border-radius:50%; background:var(--accent); animation:stepPulse 1.6s var(--ease) infinite; }
+  @keyframes stepPulse{ 0%,100%{ transform:scale(1); opacity:.9; } 50%{ transform:scale(.55); opacity:.45; } }
+  .tracker-step.is-done .tracker-step__dot{ background:var(--accent); border-color:var(--accent); }
+  .tracker-step .tracker-step__check{ width:13px; height:13px; color:var(--ink); opacity:0; transform:scale(.4); transition:opacity .35s var(--ease) .1s, transform .35s var(--ease) .1s; }
+  .tracker-step.is-done .tracker-step__check{ opacity:1; transform:scale(1); }
+  .tracker-step__content{ padding-top:4px; }
+  .tracker-step__label{ font-size:.92rem; color:var(--light); opacity:.45; transition:opacity .45s ease; }
+  .tracker-step.is-active .tracker-step__label, .tracker-step.is-done .tracker-step__label{ opacity:1; }
+  .tracker-step__time{ font-family:var(--mono); font-size:.66rem; letter-spacing:.06em; color:var(--muted); margin-top:3px; min-height:1em; }
+  .tracker-controls{ display:flex; gap:12px; margin-top:26px; flex-wrap:wrap; }
+
+  /* ============================================================
+     CHIFFRES CLÉS
+  ============================================================ */
+  .stats{ border-top:1px solid var(--border); border-bottom:1px solid var(--border); }
+  .stats__grid{ display:grid; grid-template-columns:repeat(3,1fr); }
+  .stat{
+    position:relative;
+    padding:clamp(40px,6vw,72px) var(--side);
+    border-left:1px solid var(--border);
+    cursor:pointer;
+    transition:background .35s ease, transform .35s var(--ease);
+  }
+  .stat:first-child{ border-left:0; }
+  /* Barre d'accent qui se révèle au survol (sauf 1re colonne) */
+  .stat::after{
+    content:""; position:absolute; left:0; top:0; width:2px; height:0;
+    background:var(--accent); transition:height .4s var(--ease);
+  }
+  .stat:first-child::after{ display:none; }
+  @media (hover:hover){
+    .stat:hover{ background:rgba(243,238,225,.035); transform:translateY(-3px); }
+    .stat:hover::after{ height:100%; }
+    .stat:hover .stat__num{ color:var(--accent); }
+    .stat:focus-visible{ outline:none; background:rgba(243,238,225,.035); transform:translateY(-3px); }
+    .stat:focus-visible::after{ height:100%; }
+    .stat:focus-visible .stat__num{ color:var(--accent); }
+  }
+  .stat__num{ font-family:var(--serif); font-weight:500; font-size:clamp(2.6rem,6vw,4.5rem); line-height:1; letter-spacing:-.03em; transition:color .35s ease; }
+  .stat__num span{ color:var(--accent); }
+  .stat__label{ margin-top:14px; font-family:var(--mono); font-size:.72rem; letter-spacing:.16em; text-transform:uppercase; color:var(--muted); }
+  /* Badge de tendance (KPI) */
+  .stat__trend{
+    margin-top:16px; display:inline-flex; align-items:center; gap:6px;
+    font-family:var(--mono); font-size:.7rem; letter-spacing:.04em; color:var(--accent);
+  }
+  .stat__trend svg{ width:13px; height:13px; flex:0 0 auto; }
+  @media (hover:hover){
+    .stat__trend{ opacity:0; transform:translateY(6px); transition:opacity .35s ease, transform .35s ease; }
+    .stat:hover .stat__trend, .stat:focus-visible .stat__trend{ opacity:1; transform:none; }
+  }
+  @media (max-width:768px){ .stats__grid{ grid-template-columns:1fr; } .stat{ border-left:0; border-top:1px solid var(--border); } .stat:first-child{ border-top:0; } .stat::after{ display:none; } }
+
+  /* ============================================================
+     DOUBLE CTA
+  ============================================================ */
+  .duo{ padding-block:var(--section); }
+  .duo__grid{ display:grid; grid-template-columns:1fr 1fr; gap:clamp(16px,2vw,24px); }
+  .panel{ position:relative; border-radius:var(--r-card); padding:clamp(32px,4vw,56px); min-height:clamp(320px,46vh,440px); display:flex; flex-direction:column; justify-content:flex-end; overflow:hidden; border:1px solid var(--border); }
+  .panel--dark{ background:linear-gradient(160deg,#1a1b14 0%,#0d0e0b 100%); }
+  .panel--light{ background:var(--light); color:var(--ink); }
+  .panel__deco{ position:absolute; top:-40px; right:-40px; width:240px; height:240px; border-radius:50%; opacity:.16; filter:blur(2px); }
+  .panel--dark .panel__deco{ background:radial-gradient(circle,var(--accent) 0%,transparent 70%); }
+  .panel--light .panel__deco{ background:radial-gradient(circle,var(--accent-2) 0%,transparent 70%); opacity:.22; }
+  .panel__kicker{ font-family:var(--mono); font-size:.72rem; letter-spacing:.16em; text-transform:uppercase; opacity:.7; margin-bottom:auto; }
+  .panel h3{ font-family:var(--serif); font-weight:500; font-size:clamp(1.8rem,3.4vw,2.6rem); line-height:1.05; letter-spacing:-.02em; margin-top:120px; margin-bottom:14px; max-width:14ch; }
+  .panel p{ opacity:.8; max-width:38ch; margin-bottom:28px; }
+  @media (max-width:768px){ .duo__grid{ grid-template-columns:1fr; } }
+
+  /* ============================================================
+     FOOTER
+  ============================================================ */
+  .site-footer{ border-top:1px solid var(--border); padding-block:clamp(56px,8vw,96px) 40px; }
+  .footer__top{ display:grid; grid-template-columns:1.4fr repeat(4,1fr); gap:40px; padding-inline:var(--side); max-width:1400px; margin:0 auto; }
+  .footer__brand .brand{ font-size:1.6rem; }
+  .footer__brand p{ margin-top:16px; color:var(--muted); max-width:34ch; }
+  .footer__contact{ display:flex; flex-direction:column; gap:10px; margin-top:20px; }
+  .footer__contact-link{ display:inline-flex; align-items:center; gap:8px; color:var(--light); opacity:.75; font-size:.88rem; transition:opacity .25s ease, color .25s ease; }
+  .footer__contact-link:hover{ opacity:1; color:var(--accent); }
+  .footer__contact-link svg{ flex-shrink:0; opacity:.7; }
+  .footer__col h4{ font-family:var(--mono); font-size:.72rem; letter-spacing:.16em; text-transform:uppercase; color:var(--muted); margin-bottom:18px; }
+  .footer__col li{ margin-bottom:12px; }
+  .footer__col a{ color:var(--light); opacity:.85; transition:opacity .25s ease, color .25s ease; }
+  .footer__col a:hover{ opacity:1; color:var(--accent); }
+  .footer__bottom{ max-width:1400px; margin:clamp(48px,6vw,72px) auto 0; padding:24px var(--side) 0; border-top:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; gap:20px; flex-wrap:wrap; font-family:var(--mono); font-size:.72rem; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); }
+  .socials{ display:flex; gap:10px; }
+  .socials a{ width:36px; height:36px; border-radius:50%; border:1px solid var(--border); display:grid; place-items:center; transition:background .25s ease, border-color .25s ease; }
+  .socials a:hover{ background:rgba(243,238,225,.08); border-color:var(--border-strong); }
+  .socials svg{ width:16px; height:16px; }
+  @media (max-width:900px){ .footer__top{ grid-template-columns:1fr 1fr; } .footer__brand{ grid-column:1/-1; } }
+  @media (max-width:520px){ .footer__top{ grid-template-columns:1fr; } }
+
+  /* ============================================================
+     TOASTS
+  ============================================================ */
+  .toast-stack{ position:fixed; bottom:24px; right:24px; z-index:500; display:flex; flex-direction:column; gap:10px; pointer-events:none; }
+  .toast{
+    pointer-events:auto; display:flex; align-items:center; gap:12px;
+    background:rgba(20,21,15,.92); backdrop-filter:blur(10px);
+    border:1px solid var(--border); border-radius:14px; padding:12px 16px; max-width:320px;
+    transform:translateX(120%); opacity:0; transition:transform .45s var(--ease), opacity .45s ease;
+    font-size:.88rem;
+  }
+  .toast.is-visible{ transform:none; opacity:1; }
+  .toast__icon{ width:30px; height:30px; border-radius:50%; flex:0 0 auto; display:grid; place-items:center; }
+  .toast--ok .toast__icon{ background:rgba(182,255,60,.15); color:var(--accent); }
+  .toast--info .toast__icon{ background:rgba(193,98,45,.15); color:var(--accent-2); }
+  .toast__icon svg{ width:16px; height:16px; }
+  .toast b{ display:block; }
+  .toast small{ color:var(--muted); font-family:var(--mono); font-size:.66rem; letter-spacing:.08em; text-transform:uppercase; }
+
+  /* Réduction des animations */
+  @media (prefers-reduced-motion: reduce){
+    *{ animation-duration:.001ms !important; transition-duration:.001ms !important; scroll-behavior:auto !important; }
+    .cursor-dot,.cursor-ring{ display:none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Curseur personnalisé -->
+<div class="cursor-dot" id="cursorDot" aria-hidden="true"></div>
+<div class="cursor-ring" id="cursorRing" aria-hidden="true"></div>
+
+<!-- Barre de progression de scroll -->
+<div class="scroll-progress" id="scrollProgress" aria-hidden="true"></div>
+
+<!-- ============================ HEADER ============================ -->
+<header class="site-header" id="siteHeader">
+  <div class="site-header__inner">
+    <a href="#" class="brand" aria-label="SkillMatch — accueil" data-magnetic>
+      <span class="brand__mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 L4 7 L4 17 L12 22 L20 17 L20 7 Z"/><path d="M12 2 L12 22 M4 7 L20 17 M20 7 L4 17"/></svg>
+      </span>
+      <span>SkillMatch</span>
+    </a>
+    <nav class="site-nav" aria-label="Navigation principale">
+      <button class="icon-btn icon-btn--search" id="searchOpen" aria-label="Ouvrir la recherche">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+      </button>
+      <a href="#duo" class="btn btn--light" data-magnetic>Je cherche une mission</a>
+      <button class="icon-btn menu-toggle" id="menuToggle" aria-label="Ouvrir le menu" aria-expanded="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+      </button>
+    </nav>
+  </div>
+</header>
+
+<!-- ============================ OVERLAY RECHERCHE ============================ -->
+<div class="search-overlay" id="searchOverlay" aria-hidden="true">
+  <button class="search-overlay__close" id="searchClose" aria-label="Fermer la recherche">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+  </button>
+  <form id="searchForm" role="search">
+    <label for="searchInput">Rechercher une mission, un profil, une compétence</label>
+    <input id="searchInput" type="text" autocomplete="off" placeholder="Babysitting, déménagement, cours de maths…" />
+  </form>
+  <div class="search-overlay__suggestions">
+    <button type="button">Déménagement</button>
+    <button type="button">Garde d'enfants</button>
+    <button type="button">Jardinage</button>
+    <button type="button">Cours particuliers</button>
+    <button type="button">Livraison à vélo</button>
+    <button type="button">Bricolage</button>
+  </div>
+</div>
+
+<!-- ============================ MENU MOBILE ============================ -->
+<div class="mobile-menu" id="mobileMenu" aria-hidden="true">
+  <button class="mobile-menu__close" id="menuClose" aria-label="Fermer le menu">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+  </button>
+  <div class="mobile-menu__body">
+
+    <!-- Brand -->
+    <div class="mobile-menu__brand">
+      <a href="#" class="brand" aria-label="SkillMatch">
+        <span class="brand__mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 L4 7 L4 17 L12 22 L20 17 L20 7 Z"/><path d="M12 2 L12 22 M4 7 L20 17 M20 7 L4 17"/></svg></span>
+        <span>SkillMatch</span>
+      </a>
+      <div class="mobile-menu__brand-tag"><span class="tag__dot"></span> Plateforme de missions</div>
+    </div>
+
+    <!-- Navigation principale -->
+    <nav>
+      <a href="#capabilities">Capacités</a>
+      <a href="#demo">Voir la démo</a>
+      <a href="#stats">Chiffres clés</a>
+      <a href="#duo">Me lancer</a>
+    </nav>
+
+    <!-- CTA principal -->
+    <div class="mobile-menu__cta">
+      <a href="#duo" class="btn btn--light">Je cherche une mission</a>
+    </div>
+
+    <!-- Contacts -->
+    <div class="mobile-menu__contacts">
+      <div class="mobile-menu__contacts-label">Contact</div>
+      <div class="mobile-menu__contacts-list">
+        <a href="tel:+596696250807" class="mobile-menu__contacts-item">
+          <span class="mobile-menu__contacts-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92Z"/></svg>
+          </span>
+          <span class="mobile-menu__contacts-text">
+            <span>+596 (696) 25 08 07</span>
+            <small>Téléphone</small>
+          </span>
+        </a>
+        <a href="mailto:charly.xenox@icloud.com" class="mobile-menu__contacts-item">
+          <span class="mobile-menu__contacts-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="3"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+          </span>
+          <span class="mobile-menu__contacts-text">
+            <span>charly.xenox@icloud.com</span>
+            <small>Adresse e-mail</small>
+          </span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Réseaux sociaux -->
+    <div class="mobile-menu__socials">
+      <div class="mobile-menu__socials-label">Réseaux</div>
+      <div class="mobile-menu__socials-links">
+        <a href="#" aria-label="X"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2H21l-6.51 7.44L22 22h-6.06l-4.74-6.2L5.7 22H3l6.96-7.96L2 2h6.21l4.28 5.66L17.04 2h1.2Zm-1.06 18h1.68L7.05 3.8H5.25L17.18 20Z"/></svg></a>
+        <a href="#" aria-label="LinkedIn"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M4.98 3.5A2.5 2.5 0 1 1 0 3.5a2.5 2.5 0 0 1 4.98 0ZM.5 8.5h4V24h-4V8.5Zm7 0h3.84v2.18h.05c.53-1 1.84-2.18 3.79-2.18 4.05 0 4.8 2.67 4.8 6.14V24h-4v-7.13c0-1.7-.03-3.88-2.37-3.88-2.37 0-2.73 1.85-2.73 3.76V24h-4V8.5Z"/></svg></a>
+        <a href="#" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg></a>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<main>
+  <!-- ============================ HERO ============================ -->
+  <section class="hero" aria-label="Présentation de SkillMatch">
+    <div class="hero__media" id="heroMedia" aria-hidden="true"></div>
+    <div class="hero__shade" aria-hidden="true"></div>
+
+    <span class="tag hero__eyebrow"><span class="tag__dot"></span> Plateforme de missions ponctuelles</span>
+    <h1>Ta prochaine mission,<br>à un <span class="rot" id="heroRot">swipe</span> près.</h1>
+    <div class="hero__cta">
+      <a href="#demo" class="btn btn--light" data-magnetic>Je cherche une mission</a>
+      <a href="#duo" class="btn btn--ghost" data-magnetic>J'ai besoin d'un coup de main</a>
+    </div>
+
+    <div class="hero__scroll" aria-hidden="true">
+      <span>Scroll</span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M6 13l6 6 6-6"/></svg>
+    </div>
+  </section>
+
+  <!-- ============================ CAPACITÉS ============================ -->
+  <section class="capabilities" id="capabilities" aria-labelledby="cap-title">
+    <div class="section-head reveal">
+      <div>
+        <span class="tag" style="margin-bottom:18px;"><span class="tag__dot"></span> Capacités</span>
+        <h2 id="cap-title">Tout pour trouver,<br>réaliser et sécuriser une mission.</h2>
+      </div>
+      <p>Six briques qui transforment un besoin ponctuel en mission contractualisée, payée et notée — en quelques minutes.</p>
+    </div>
+
+    <div class="carousel-wrap">
+      <div class="carousel" id="carousel" aria-label="Capacités de SkillMatch" tabindex="0">
+
+        <article class="card-cap tilt-card">
+          <div class="card-cap__media" style="background-image:url('https://picsum.photos/seed/skillmatch-profil/800/900')"></div>
+          <div class="card-cap__shade"></div>
+          <div class="card-cap__top"><span class="tag"><span class="tag__dot"></span> 01 · Identité pro</span></div>
+          <div class="card-cap__body">
+            <h3 class="card-cap__title">Un profil qui se remplit tout seul, à chaque mission.</h3>
+            <span class="card-cap__arrow">Compétences & CV auto <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M7 17 17 7M9 7h8v8"/></svg></span>
+          </div>
+        </article>
+
+        <article class="card-cap tilt-card">
+          <div class="card-cap__media" style="background-image:url('https://picsum.photos/seed/skillmatch-swipe/800/900')"></div>
+          <div class="card-cap__shade"></div>
+          <div class="card-cap__top"><span class="tag"><span class="tag__dot tag__dot--amber"></span> 02 · Découverte</span></div>
+          <div class="card-cap__body">
+            <h3 class="card-cap__title">Swipe, match, c'est signé. Le serious swipe.</h3>
+            <span class="card-cap__arrow">Recommandations & stories <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M7 17 17 7M9 7h8v8"/></svg></span>
+          </div>
+        </article>
+
+        <article class="card-cap tilt-card">
+          <div class="card-cap__media" style="background-image:url('https://picsum.photos/seed/skillmatch-trust/800/900')"></div>
+          <div class="card-cap__shade"></div>
+          <div class="card-cap__top"><span class="tag"><span class="tag__dot"></span> 03 · Réputation</span></div>
+          <div class="card-cap__body">
+            <h3 class="card-cap__title">La confiance, version chiffrée. Notée des deux côtés.</h3>
+            <span class="card-cap__arrow">XP, ponctualité, annulation <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M7 17 17 7M9 7h8v8"/></svg></span>
+          </div>
+        </article>
+
+        <article class="card-cap tilt-card">
+          <div class="card-cap__media" style="background-image:url('https://picsum.photos/seed/skillmatch-tracking/800/900')"></div>
+          <div class="card-cap__shade"></div>
+          <div class="card-cap__top"><span class="tag"><span class="tag__dot tag__dot--amber"></span> 04 · Suivi live</span></div>
+          <div class="card-cap__body">
+            <h3 class="card-cap__title">Acceptée. En route. Terminée. Suis chaque mission comme un livreur.</h3>
+            <span class="card-cap__arrow">Fil d'actualité temps réel <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M7 17 17 7M9 7h8v8"/></svg></span>
+          </div>
+        </article>
+
+        <article class="card-cap tilt-card">
+          <div class="card-cap__media" style="background-image:url('https://picsum.photos/seed/skillmatch-pay/800/900')"></div>
+          <div class="card-cap__shade"></div>
+          <div class="card-cap__top"><span class="tag"><span class="tag__dot"></span> 05 · Contrat & paiement</span></div>
+          <div class="card-cap__body">
+            <h3 class="card-cap__title">Signé en ligne, payé à la fin. Le contrat sort tout seul.</h3>
+            <span class="card-cap__arrow">Portefeuille, factures, taxes <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M7 17 17 7M9 7h8v8"/></svg></span>
+          </div>
+        </article>
+
+        <article class="card-cap tilt-card">
+          <div class="card-cap__media" style="background-image:url('https://picsum.photos/seed/skillmatch-dashboard/800/900')"></div>
+          <div class="card-cap__shade"></div>
+          <div class="card-cap__top"><span class="tag"><span class="tag__dot tag__dot--amber"></span> 06 · Pilotage</span></div>
+          <div class="card-cap__body">
+            <h3 class="card-cap__title">Un tableau de bord pour piloter ton activité, pas la subir.</h3>
+            <span class="card-cap__arrow">Stats, missions, revenus <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M7 17 17 7M9 7h8v8"/></svg></span>
+          </div>
+        </article>
+
+      </div>
+    </div>
+
+    <div class="carousel-progress">
+      <span class="carousel-progress__count" id="carouselCount">01 / 06</span>
+      <div class="carousel-progress__track"><div class="carousel-progress__bar" id="carouselBar"></div></div>
+    </div>
+  </section>
+
+  <!-- ============================ DÉMO INTERACTIVE ============================ -->
+  <section class="demo" id="demo" aria-labelledby="demo-title">
+    <div class="container">
+      <div class="section-head reveal">
+        <div>
+          <span class="tag" style="margin-bottom:18px;"><span class="tag__dot"></span> Démo live</span>
+          <h2 id="demo-title">Vois-le à l'œuvre,<br>pas sur un PowerPoint.</h2>
+        </div>
+        <p>Deux signatures de SkillMatch, en vrai et sans backend : le serious swipe et le suivi de mission en temps réel. Glisse, clique, rejoue.</p>
+      </div>
+
+      <div class="demo__grid">
+
+        <!-- DÉMO 1 : SWIPE -->
+        <div class="demo-panel reveal">
+          <div class="demo-panel__head">
+            <h3>Le serious swipe</h3>
+            <span class="demo-panel__hint">Glisse ← / → &nbsp;·&nbsp; ou touches ← →</span>
+          </div>
+
+          <div class="swipe-stage" id="swipeStage" aria-label="Pile de cartes mission à swiper"></div>
+
+          <div class="swipe-controls">
+            <button class="swipe-btn swipe-btn--nope" id="swipeNope" aria-label="Passer (swipe gauche)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+            </button>
+            <button class="swipe-btn swipe-btn--like" id="swipeLike" aria-label="Matcher (swipe droit)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8Z"/></svg>
+            </button>
+          </div>
+
+          <div class="swipe-tally">
+            <span>Matchs <b id="tallyLike">0</b></span>
+            <span>Passés <b id="tallyNope">0</b></span>
+            <span>Vues <b id="tallySeen">0</b></span>
+          </div>
+        </div>
+
+        <!-- DÉMO 2 : TRACKER -->
+        <div class="demo-panel reveal">
+          <div class="demo-panel__head">
+            <h3>Suivi de mission live</h3>
+            <span class="demo-panel__hint" id="trackerHint">En attente</span>
+          </div>
+
+          <!-- Carte d'info mission -->
+          <div class="tracker-card" role="status" aria-live="polite">
+            <div class="tracker-card__avatar" aria-hidden="true"></div>
+            <div class="tracker-card__info">
+              <div class="tracker-card__name">Karim B.</div>
+              <div class="tracker-card__mission">Montage de meubles · 0,5 km</div>
+              <div class="tracker-card__price">40 €</div>
+            </div>
+            <div class="tracker-eta-box">
+              <span class="tracker-eta-box__num" id="trackerEta">—</span>
+              <span class="tracker-eta-box__lbl" id="trackerEtaLbl">ETA</span>
+            </div>
+          </div>
+
+          <!-- Barre de progression globale -->
+          <div class="tracker-bar" aria-hidden="true"><div class="tracker-bar__fill" id="trackerBar"></div></div>
+
+          <!-- Stepper -->
+          <div class="tracker-steps" id="trackerSteps">
+            <div class="tracker-rail"><div class="tracker-rail__fill" id="trackerRailFill"></div></div>
+            <div class="tracker-step" data-step="0">
+              <span class="tracker-step__dot">
+                <svg class="tracker-step__check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+              </span>
+              <div class="tracker-step__content"><div class="tracker-step__label">Mission acceptée</div><div class="tracker-step__time" data-ts>—</div></div>
+            </div>
+            <div class="tracker-step" data-step="1">
+              <span class="tracker-step__dot">
+                <svg class="tracker-step__check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+              </span>
+              <div class="tracker-step__content"><div class="tracker-step__label">Prestataire en route</div><div class="tracker-step__time" data-ts>—</div></div>
+            </div>
+            <div class="tracker-step" data-step="2">
+              <span class="tracker-step__dot">
+                <svg class="tracker-step__check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+              </span>
+              <div class="tracker-step__content"><div class="tracker-step__label">Arrivé sur place</div><div class="tracker-step__time" data-ts>—</div></div>
+            </div>
+            <div class="tracker-step" data-step="3">
+              <span class="tracker-step__dot">
+                <svg class="tracker-step__check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+              </span>
+              <div class="tracker-step__content"><div class="tracker-step__label">Mission en cours</div><div class="tracker-step__time" data-ts>—</div></div>
+            </div>
+            <div class="tracker-step" data-step="4">
+              <span class="tracker-step__dot">
+                <svg class="tracker-step__check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+              </span>
+              <div class="tracker-step__content"><div class="tracker-step__label">Terminée & payée</div><div class="tracker-step__time" data-ts>—</div></div>
+            </div>
+          </div>
+
+          <div class="tracker-controls">
+            <button class="btn btn--accent btn--sm" id="trackerPlay">▶ Lancer la simulation</button>
+            <button class="btn btn--ghost btn--sm" id="trackerReset">Rejouer</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ CHIFFRES CLÉS ============================ -->
+  <section class="stats" id="stats" aria-labelledby="stats-title">
+    <h2 id="stats-title" class="sr-only">La plateforme en chiffres</h2>
+    <div class="stats__grid">
+      <div class="stat reveal" tabindex="0" role="button" aria-label="Missions réalisées : 48 000 plus. Cliquez pour relancer l'animation.">
+        <div class="stat__num" data-count="48000" data-suffix="+">0</div>
+        <div class="stat__label">Missions réalisées</div>
+        <span class="stat__trend">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg>
+          +8 % ce mois
+        </span>
+      </div>
+      <div class="stat reveal" tabindex="0" role="button" aria-label="Note moyenne croisée : 4,8 sur 5. Cliquez pour relancer l'animation.">
+        <div class="stat__num" data-count="4.8" data-suffix="/5" data-decimals="1">0</div>
+        <div class="stat__label">Note moyenne croisée</div>
+        <span class="stat__trend">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg>
+          96 % positif
+        </span>
+      </div>
+      <div class="stat reveal" tabindex="0" role="button" aria-label="Temps de réponse moyen : moins de 9 minutes. Cliquez pour relancer l'animation.">
+        <div class="stat__num" data-count="9" data-prefix="&lt;" data-suffix=" min">0</div>
+        <div class="stat__label">Temps de réponse moyen</div>
+        <span class="stat__trend">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg>
+          −2 min vs 2024
+        </span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ DOUBLE CTA ============================ -->
+  <section class="duo" id="duo" aria-labelledby="duo-title">
+    <h2 id="duo-title" class="sr-only">Choisis ton camp</h2>
+    <div class="container">
+      <div class="duo__grid">
+        <div class="panel panel--dark reveal">
+          <span class="panel__deco" aria-hidden="true"></span>
+          <span class="panel__kicker">Pour les missionnaires</span>
+          <h3>Trouve ta prochaine mission en quelques minutes.</h3>
+          <p>Swipe les offres près de chez toi, signe en ligne, sois payé. Ton CV se construit tout seul à chaque mission réalisée.</p>
+          <div><a href="#" class="btn btn--light" data-magnetic data-toast="Téléchargement de l'app lancé 📲|L'app SkillMatch arrive sur ton téléphone.">Télécharger l'app</a></div>
+        </div>
+        <div class="panel panel--light reveal">
+          <span class="panel__deco" aria-hidden="true"></span>
+          <span class="panel__kicker">Pour les recruteurs</span>
+          <h3>De la main-d'œuvre fiable, contractualisée et notée.</h3>
+          <p>Publie ton besoin, reçois des profils triés, signe le contrat auto-généré. Paiement sécurisé et factures incluses.</p>
+          <div><a href="#" class="btn btn--dark" data-magnetic data-toast="Mission publiée ✅|Tu recevras des profils sous quelques minutes.">Publier une mission</a></div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- ============================ FOOTER ============================ -->
+<footer class="site-footer">
+  <div class="footer__top">
+    <div class="footer__brand">
+      <a href="#" class="brand" aria-label="SkillMatch">
+        <span class="brand__mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 L4 7 L4 17 L12 22 L20 17 L20 7 Z"/><path d="M12 2 L12 22 M4 7 L20 17 M20 7 L4 17"/></svg></span>
+        <span>SkillMatch</span>
+      </a>
+      <p>La plateforme qui transforme un besoin ponctuel en mission propre, payée et notée.</p>
+      <div class="footer__contact">
+        <a href="tel:+596696250807" class="footer__contact-link">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92Z"/></svg>
+          <span>+596 (696) 25 08 07</span>
+        </a>
+        <a href="mailto:charly.xenox@icloud.com" class="footer__contact-link">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="3"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+          <span>charly.xenox@icloud.com</span>
+        </a>
+      </div>
+    </div>
+    <div class="footer__col"><h4>Produit</h4><ul><li><a href="#capabilities">Capacités</a></li><li><a href="#">Application mobile</a></li><li><a href="#">Pilotage</a></li><li><a href="#">Sécurité</a></li></ul></div>
+    <div class="footer__col"><h4>Entreprise</h4><ul><li><a href="#">À propos</a></li><li><a href="#">Équipe</a></li><li><a href="#">Carrières</a></li><li><a href="#">Presse</a></li></ul></div>
+    <div class="footer__col"><h4>Ressources</h4><ul><li><a href="#">Centre d'aide</a></li><li><a href="#">Guide du missionnaire</a></li><li><a href="#">Tarifs</a></li><li><a href="#">Statut</a></li></ul></div>
+    <div class="footer__col"><h4>Légal</h4><ul><li><a href="#">Conditions</a></li><li><a href="#">Confidentialité</a></li><li><a href="#">Cookies</a></li><li><a href="#">Mentions légales</a></li></ul></div>
+  </div>
+  <div class="footer__bottom">
+    <span>© 2026 SkillMatch — Démo concept. Tous droits réservés.</span>
+    <div class="socials">
+      <a href="#" aria-label="X"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2H21l-6.51 7.44L22 22h-6.06l-4.74-6.2L5.7 22H3l6.96-7.96L2 2h6.21l4.28 5.66L17.04 2h1.2Zm-1.06 18h1.68L7.05 3.8H5.25L17.18 20Z"/></svg></a>
+      <a href="#" aria-label="LinkedIn"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M4.98 3.5A2.5 2.5 0 1 1 0 3.5a2.5 2.5 0 0 1 4.98 0ZM.5 8.5h4V24h-4V8.5Zm7 0h3.84v2.18h.05c.53-1 1.84-2.18 3.79-2.18 4.05 0 4.8 2.67 4.8 6.14V24h-4v-7.13c0-1.7-.03-3.88-2.37-3.88-2.37 0-2.73 1.85-2.73 3.76V24h-4V8.5Z"/></svg></a>
+      <a href="#" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg></a>
+    </div>
+  </div>
+</footer>
+
+<!-- Pile de toasts -->
+<div class="toast-stack" id="toastStack" aria-live="polite" aria-atomic="true"></div>
+
+<script>
+(function(){
+  "use strict";
+  var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var fineCursor = window.matchMedia("(hover:hover) and (pointer:fine)").matches;
+  var $  = function(s, c){ return (c||document).querySelector(s); };
+  var $$ = function(s, c){ return Array.prototype.slice.call((c||document).querySelectorAll(s)); };
+  var lerp = function(a,b,t){ return a+(b-a)*t; };
+  var clamp = function(v,min,max){ return Math.min(max, Math.max(min, v)); };
+
+  /* ========================================================
+     1. CURSEUR PERSONNALISÉ + BOUTONS MAGNÉTIQUES
+  ======================================================== */
+  if(fineCursor && !reduceMotion){
+    var dot = $("#cursorDot"), ring = $("#cursorRing");
+    document.body.classList.add("cursor-ready");
+    var mx = window.innerWidth/2, my = window.innerHeight/2;
+    var rx = mx, ry = my;
+    window.addEventListener("mousemove", function(e){
+      mx = e.clientX; my = e.clientY;
+      dot.style.transform = "translate("+mx+"px,"+my+"px) translate(-50%,-50%)";
+    }, {passive:true});
+    (function loop(){
+      rx = lerp(rx, mx, 0.18); ry = lerp(ry, my, 0.18);
+      ring.style.transform = "translate("+rx+"px,"+ry+"px) translate(-50%,-50%)";
+      requestAnimationFrame(loop);
+    })();
+    window.addEventListener("mousedown", function(){ ring.classList.add("is-down"); });
+    window.addEventListener("mouseup",   function(){ ring.classList.remove("is-down"); });
+
+    var hoverSel = "a, button, .tilt-card, [data-magnetic], input";
+    $$(hoverSel).forEach(function(el){
+      el.addEventListener("mouseenter", function(){ ring.classList.add("is-hover"); });
+      el.addEventListener("mouseleave", function(){ ring.classList.remove("is-hover"); });
+    });
+
+    // Magnétisme
+    var STRENGTH = 0.35;
+    $$("[data-magnetic]").forEach(function(el){
+      el.addEventListener("mousemove", function(e){
+        var r = el.getBoundingClientRect();
+        var x = e.clientX - (r.left + r.width/2);
+        var y = e.clientY - (r.top + r.height/2);
+        el.style.transform = "translate("+(x*STRENGTH)+"px,"+(y*STRENGTH)+"px)";
+      });
+      el.addEventListener("mouseleave", function(){ el.style.transform = ""; });
+    });
+  }
+
+  /* ========================================================
+     2. BARRE DE PROGRESSION DE SCROLL
+  ======================================================== */
+  var progress = $("#scrollProgress");
+  var onProgressScroll = function(){
+    var h = document.documentElement;
+    var scrolled = h.scrollTop;
+    var total = h.scrollHeight - h.clientHeight;
+    progress.style.width = (total > 0 ? (scrolled/total)*100 : 0) + "%";
+  };
+  window.addEventListener("scroll", onProgressScroll, {passive:true});
+  onProgressScroll();
+
+  /* ========================================================
+     3. HEADER OPAQUE AU SCROLL
+  ======================================================== */
+  var header = $("#siteHeader");
+  var onHeaderScroll = function(){ header.classList.toggle("is-scrolled", window.scrollY > 80); };
+  window.addEventListener("scroll", onHeaderScroll, {passive:true});
+  onHeaderScroll();
+
+  /* ========================================================
+     4. MENU MOBILE + OVERLAY RECHERCHE
+  ======================================================== */
+  var mobileMenu = $("#mobileMenu"), menuToggle = $("#menuToggle");
+  var openMenu = function(){ mobileMenu.classList.add("is-open"); mobileMenu.setAttribute("aria-hidden","false"); menuToggle.setAttribute("aria-expanded","true"); document.body.style.overflow="hidden"; };
+  var closeMenu = function(){ mobileMenu.classList.remove("is-open"); mobileMenu.setAttribute("aria-hidden","true"); menuToggle.setAttribute("aria-expanded","false"); document.body.style.overflow=""; };
+  menuToggle.addEventListener("click", openMenu);
+  $("#menuClose").addEventListener("click", closeMenu);
+  $$("a", mobileMenu).forEach(function(a){ a.addEventListener("click", closeMenu); });
+
+  var searchOverlay = $("#searchOverlay"), searchInput = $("#searchInput");
+  $("#searchOpen").addEventListener("click", function(){ searchOverlay.classList.add("is-open"); searchOverlay.setAttribute("aria-hidden","false"); document.body.style.overflow="hidden"; setTimeout(function(){ searchInput.focus(); }, 250); });
+  var closeSearch = function(){ searchOverlay.classList.remove("is-open"); searchOverlay.setAttribute("aria-hidden","true"); document.body.style.overflow=""; };
+  $("#searchClose").addEventListener("click", closeSearch);
+  document.addEventListener("keydown", function(e){ if(e.key === "Escape"){ closeMenu(); closeSearch(); } });
+  $("#searchForm").addEventListener("submit", function(e){
+    e.preventDefault();
+    var v = searchInput.value.trim();
+    Toast.ok(v ? "Recherche : « "+v+" »" : "Recherche SkillMatch", "Le moteur de recherche est en démo.");
+    closeSearch();
+  });
+  $$(".search-overlay__suggestions button").forEach(function(b){
+    b.addEventListener("click", function(){ searchInput.value = b.textContent; searchInput.focus(); });
+  });
+
+  /* ========================================================
+     5. HERO : parallax + mot rotatif
+  ======================================================== */
+  var heroMedia = $("#heroMedia");
+  if(heroMedia && !reduceMotion){
+    window.addEventListener("scroll", function(){
+      var y = window.scrollY;
+      if(y < window.innerHeight){ heroMedia.style.transform = "translateY("+(y*0.25)+"px) scale(1.06)"; }
+    }, {passive:true});
+  }
+  var rot = $("#heroRot"), words = ["swipe","match","clic"], wi = 0;
+  if(rot && !reduceMotion){
+    setInterval(function(){
+      wi = (wi+1) % words.length;
+      rot.style.transition = "opacity .35s ease, transform .35s ease";
+      rot.style.opacity = "0"; rot.style.transform = "translateY(-8px)";
+      setTimeout(function(){
+        rot.textContent = words[wi];
+        rot.style.opacity = "1"; rot.style.transform = "translateY(0)";
+      }, 360);
+    }, 2600);
+  }
+
+  /* ========================================================
+     6. REVEAL ÉCHELONNÉ (Intersection Observer)
+  ======================================================== */
+  var reveals = $$(".reveal");
+  if("IntersectionObserver" in window){
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add("is-visible"); io.unobserve(e.target); } });
+    }, {threshold:0.15, rootMargin:"0px 0px -8% 0px"});
+    reveals.forEach(function(el){ io.observe(el); });
+  } else { reveals.forEach(function(el){ el.classList.add("is-visible"); }); }
+
+  /* ========================================================
+     7. COMPTEURS ANIMÉS (cartes KPI interactives)
+  ======================================================== */
+  var counters = $$(".stat__num[data-count]");
+  var runCount = function(el){
+    if(el.dataset.counting === "1") return;
+    el.dataset.counting = "1";
+    var target = parseFloat(el.getAttribute("data-count"));
+    var suffix = el.getAttribute("data-suffix") || "";
+    var prefix = el.getAttribute("data-prefix") || "";
+    var decimals = parseInt(el.getAttribute("data-decimals") || "0", 10);
+    var dur = 1600, start = performance.now();
+    var fmt = function(n){ return decimals>0 ? n.toFixed(decimals).replace(".",",") : Math.round(n).toLocaleString("fr-FR"); };
+    var tick = function(now){
+      var p = Math.min((now-start)/dur, 1);
+      var eased = 1 - Math.pow(1-p, 3);
+      el.innerHTML = prefix + fmt(target*eased) + suffix;
+      if(p < 1){ requestAnimationFrame(tick); } else { el.innerHTML = prefix + fmt(target) + suffix; el.dataset.counting = "0"; }
+    };
+    requestAnimationFrame(tick);
+  };
+  // Premier déclenchement à l'entrée dans le viewport
+  if("IntersectionObserver" in window && !reduceMotion){
+    var cio = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){ if(e.isIntersecting){ runCount(e.target); cio.unobserve(e.target); } });
+    }, {threshold:0.5});
+    counters.forEach(function(el){ cio.observe(el); });
+  } else { counters.forEach(function(el){ runCount(el); }); }
+
+  // Recomptage au clic / clavier (réutilise le même runCount, protégé par le flag)
+  $$(".stat").forEach(function(card){
+    var num = $(".stat__num", card);
+    var trigger = function(){ num.dataset.counting = "0"; runCount(num); };
+    card.addEventListener("click", trigger);
+    card.addEventListener("keydown", function(e){
+      if(e.key === "Enter" || e.key === " "){ e.preventDefault(); trigger(); }
+    });
+  });
+
+  /* ========================================================
+     8. CARROUSEL : drag + molette + barre de progression
+  ======================================================== */
+  var carousel = $("#carousel");
+  if(carousel){
+    var bar = $("#carouselBar"), countEl = $("#carouselCount");
+    var cards = $$(".card-cap", carousel);
+    var total = cards.length;
+    var updateProgress = function(){
+      var maxScroll = carousel.scrollWidth - carousel.clientWidth;
+      var ratio = maxScroll > 0 ? carousel.scrollLeft / maxScroll : 0;
+      bar.style.width = (clamp(ratio,0,1) * 100) + "%";
+      // index le plus proche
+      var idx = Math.round(carousel.scrollLeft / (cards[0].offsetWidth + 20));
+      countEl.textContent = String(clamp(idx,0,total-1)+1).padStart(2,"0") + " / " + String(total).padStart(2,"0");
+    };
+    carousel.addEventListener("scroll", updateProgress, {passive:true});
+    window.addEventListener("resize", updateProgress);
+    updateProgress();
+
+    // Drag à la souris
+    var isDown=false, startX=0, startScroll=0, moved=false;
+    carousel.addEventListener("pointerdown", function(e){
+      if(e.pointerType==="mouse" && e.button!==0) return;
+      isDown=true; moved=false; startX=e.clientX; startScroll=carousel.scrollLeft;
+      carousel.classList.add("is-dragging");
+      try{ carousel.setPointerCapture(e.pointerId); }catch(_){}
+    });
+    carousel.addEventListener("pointermove", function(e){
+      if(!isDown) return;
+      var dx = e.clientX - startX; if(Math.abs(dx)>4) moved=true;
+      carousel.scrollLeft = startScroll - dx;
+    });
+    var endDrag = function(){ if(!isDown) return; isDown=false; carousel.classList.remove("is-dragging"); };
+    carousel.addEventListener("pointerup", endDrag);
+    carousel.addEventListener("pointercancel", endDrag);
+    carousel.addEventListener("pointerleave", endDrag);
+    carousel.addEventListener("click", function(e){ if(moved){ e.preventDefault(); e.stopPropagation(); } }, true);
+
+    // Molette → scroll horizontal
+    carousel.addEventListener("wheel", function(e){
+      if(Math.abs(e.deltaY) > Math.abs(e.deltaX)){
+        e.preventDefault();
+        carousel.scrollLeft += e.deltaY;
+      }
+    }, {passive:false});
+
+    // Clavier
+    var step = function(){ return cards[0].offsetWidth + 20; };
+    carousel.addEventListener("keydown", function(e){
+      if(e.key === "ArrowRight"){ carousel.scrollBy({left:step(), behavior:"smooth"}); }
+      else if(e.key === "ArrowLeft"){ carousel.scrollBy({left:-step(), behavior:"smooth"}); }
+    });
+  }
+
+  /* ========================================================
+     9. EFFET 3D TILT sur les cartes capacités
+  ======================================================== */
+  if(fineCursor && !reduceMotion){
+    $$(".tilt-card").forEach(function(card){
+      var MAX = 7;
+      card.addEventListener("pointermove", function(e){
+        var r = card.getBoundingClientRect();
+        var px = (e.clientX - r.left) / r.width;
+        var py = (e.clientY - r.top) / r.height;
+        var rx = (0.5 - py) * MAX * 2;
+        var ry = (px - 0.5) * MAX * 2;
+        card.style.transform = "perspective(900px) rotateX("+rx+"deg) rotateY("+ry+"deg)";
+      });
+      card.addEventListener("pointerleave", function(){ card.style.transform = ""; });
+    });
+  }
+
+  /* ========================================================
+     10. DÉMO SWIPE (serious swipe)
+  ======================================================== */
+  (function initSwipe(){
+    var stage = $("#swipeStage");
+    if(!stage) return;
+
+    var pool = [
+      { name:"Emma L.", age:24, mission:"Aide au déménagement", dur:"3 h", price:"45 €", dist:"1,2 km", seed:"emma", verified:true },
+      { name:"Karim B.", age:29, mission:"Garde d'enfants — soirée", dur:"Soirée", price:"15 €/h", dist:"0,8 km", seed:"karim", verified:true },
+      { name:"Léa M.", age:22, mission:"Entretien du jardin", dur:"2 h", price:"30 €", dist:"2,4 km", seed:"lea", verified:false },
+      { name:"Thomas R.", age:31, mission:"Livraison à vélo", dur:"Journée", price:"80 €", dist:"3,1 km", seed:"thomas", verified:true },
+      { name:"Sara D.", age:26, mission:"Cours de maths (lycée)", dur:"1 h", price:"25 €", dist:"1,7 km", seed:"sara", verified:true },
+      { name:"Nino P.", age:28, mission:"Montage de meubles", dur:"2 h", price:"40 €", dist:"0,5 km", seed:"nino", verified:false }
+    ];
+
+    var stack = [];     // indexes restants
+    var likeCount = 0, nopeCount = 0, seenCount = 0;
+    var THRESH = 110;   // px de déclenchement
+    var activeCard = null; // élément courant
+
+    var makeCard = function(item){
+      var el = document.createElement("div");
+      el.className = "swipe-card";
+      el.setAttribute("role","group");
+      el.setAttribute("aria-label", item.mission + " — " + item.name);
+      el.innerHTML =
+        '<span class="swipe-stamp swipe-stamp--like">MATCH</span>'+
+        '<span class="swipe-stamp swipe-stamp--nope">NON</span>'+
+        (item.verified ? '<span class="swipe-card__verified" title="Identité vérérée"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>' : '')+
+        '<div class="swipe-card__photo" style="background-image:url(\'https://picsum.photos/seed/'+item.seed+'/420/420\')"></div>'+
+        '<div class="swipe-card__body">'+
+          '<div><div class="swipe-card__name">'+item.name+' <span>'+item.age+' ans</span></div>'+
+          '<div class="swipe-card__mission">'+item.mission+'</div></div>'+
+          '<div class="swipe-card__meta"><span>'+item.dur+'</span><span>·</span><span><b>'+item.price+'</b></span><span>·</span><span>'+item.dist+'</span></div>'+
+        '</div>';
+      return el;
+    };
+
+    var renderStack = function(){
+      stage.innerHTML = "";
+      // On affiche les 3 premières cartes empilées
+      var visible = stack.slice(0, 3);
+      visible.forEach(function(item, i){
+        var card = makeCard(item);
+        var depth = visible.length - 1 - i; // 0 = dessus
+        card.style.transform = "translateY("+(depth*10)+"px) scale("+(1 - depth*0.04)+")";
+        card.style.zIndex = String(10 - depth);
+        card.style.transition = "transform .4s var(--ease), opacity .3s ease";
+        stage.appendChild(card);
+      });
+      activeCard = stage.firstChild;
+      bindDrag(activeCard);
+    };
+
+    var bindDrag = function(card){
+      if(!card) return;
+      var dragging=false, sx=0, sy=0, dx=0, dy=0;
+      card.addEventListener("pointerdown", function(e){
+        if(e.pointerType==="mouse" && e.button!==0) return;
+        dragging=true; sx=e.clientX; sy=e.clientY; dx=0; dy=0;
+        card.style.transition = "none";
+        try{ card.setPointerCapture(e.pointerId); }catch(_){}
+      });
+      card.addEventListener("pointermove", function(e){
+        if(!dragging) return;
+        dx = e.clientX - sx; dy = e.clientY - sy;
+        var rot = dx * 0.05;
+        card.style.transform = "translate("+dx+"px,"+dy+"px) rotate("+rot+"deg)";
+        card.setAttribute("data-verdict", dx > THRESH ? "like" : (dx < -THRESH ? "nope" : ""));
+      });
+      var finish = function(){
+        if(!dragging) return; dragging=false;
+        card.style.transition = "transform .45s var(--ease), opacity .35s ease";
+        if(dx > THRESH){ fly(card, 1, "like"); }
+        else if(dx < -THRESH){ fly(card, -1, "nope"); }
+        else {
+          card.removeAttribute("data-verdict");
+          card.style.transform = ""; // ressort
+        }
+      };
+      card.addEventListener("pointerup", finish);
+      card.addEventListener("pointercancel", finish);
+    };
+
+    var fly = function(card, dir, verdict){
+      var x = dir * (window.innerWidth + 200);
+      card.style.transform = "translate("+x+"px,"+(dir*60)+"px) rotate("+(dir*22)+"deg)";
+      card.style.opacity = "0";
+      if(verdict === "like"){ likeCount++; Toast.ok("Match avec "+ (activeName()), "Tu peux engager la discussion."); }
+      else { nopeCount++; Toast.info("Profil passé", "On ne te le remontrera plus."); }
+      seenCount++;
+      stack.shift();
+      updateTally();
+      setTimeout(function(){
+        if(stack.length === 0){ reshuffle(); }
+        else { renderStack(); }
+      }, 300);
+    };
+    var activeName = function(){ return stack[0] ? stack[0].name : ""; };
+
+    var updateTally = function(){
+      $("#tallyLike").textContent = likeCount;
+      $("#tallyNope").textContent = nopeCount;
+      $("#tallySeen").textContent = seenCount;
+    };
+
+    var reshuffle = function(){
+      stack = pool.slice();
+      // mélange Fisher–Yates
+      for(var i=stack.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=stack[i]; stack[i]=stack[j]; stack[j]=t; }
+      renderStack();
+    };
+
+    // Boutons alternatifs + clavier
+    var likeBtn = $("#swipeLike");
+    likeBtn.addEventListener("click", function(){
+      if(activeCard && !activeCard.dataset.flying){
+        activeCard.dataset.flying = "1";
+        fly(activeCard, 1, "like");
+        likeBtn.classList.add("is-liked");
+        setTimeout(function(){ likeBtn.classList.remove("is-liked"); }, 450);
+      }
+    });
+    $("#swipeNope").addEventListener("click", function(){
+      if(activeCard && !activeCard.dataset.flying){
+        activeCard.dataset.flying = "1";
+        fly(activeCard, -1, "nope");
+      }
+    });
+    document.addEventListener("keydown", function(e){
+      if(!stage.closest("section").classList.contains("is-visible") && window.scrollY < 100) return;
+      var tag = (document.activeElement || {}).tagName;
+      if(tag === "INPUT" || tag === "TEXTAREA") return;
+      if(e.key === "ArrowRight" && !e.target.closest("#carousel")){ $("#swipeLike").click(); }
+      else if(e.key === "ArrowLeft" && !e.target.closest("#carousel")){ $("#swipeNope").click(); }
+    });
+
+    reshuffle();
+  })();
+
+  /* ========================================================
+     11. DÉMO TRACKER (suivi de mission live)
+  ======================================================== */
+  (function initTracker(){
+    var stepsEl = $("#trackerSteps");
+    if(!stepsEl) return;
+
+    var stepEls    = $$(".tracker-step", stepsEl);
+    var railFill   = $("#trackerRailFill");
+    var bar        = $("#trackerBar");
+    var etaEl      = $("#trackerEta");
+    var etaLbl     = $("#trackerEtaLbl");
+    var hint       = $("#trackerHint");
+    var playBtn    = $("#trackerPlay"), resetBtn = $("#trackerReset");
+
+    var total   = stepEls.length;
+    var current = -1;     // -1 = rien, 0..total-1 = étape active
+    var playing = false;
+    var timer   = null;
+    var timestamps = [];  // horodatage fixe par étape (HH:MM)
+
+    // Étapes : libellé, valeur affichée ETA + libellé court
+    var stages = [
+      { eta:"maintenant",  lbl:"Acceptée" },
+      { eta:"8 min",       lbl:"En route" },
+      { eta:"2 min",       lbl:"Arrive" },
+      { eta:"En cours",    lbl:"En cours" },
+      { eta:"Fait",        lbl:"Payé" }
+    ];
+
+    var timeStr = function(d){
+      return ("0"+d.getHours()).slice(-2) + ":" + ("0"+d.getMinutes()).slice(-2);
+    };
+
+    // Recalcule la position/hauteur du rail pour l'aligner exactement
+    // sur les centres des dots (indépendant de la taille d'écran).
+    var positionRail = function(){
+      var rail = $(".tracker-rail", stepsEl);
+      if(!stepEls.length) return;
+      var firstDot = $(".tracker-step__dot", stepEls[0]);
+      var lastDot  = $(".tracker-step__dot", stepEls[stepEls.length-1]);
+      var stepsRect = stepsEl.getBoundingClientRect();
+      var r1 = firstDot.getBoundingClientRect();
+      var r2 = lastDot.getBoundingClientRect();
+      var top  = (r1.top  - stepsRect.top) + r1.height/2;
+      var bottom = (r2.top - stepsRect.top) + r2.height/2;
+      var height = Math.max(0, bottom - top);
+      rail.style.top    = top + "px";
+      rail.style.height = height + "px";
+      return height;
+    };
+
+    var render = function(animate){
+      var doAnimate = animate !== false;
+      // États des étapes
+      stepEls.forEach(function(el, i){
+        el.classList.toggle("is-done", i < current);
+        el.classList.toggle("is-active", i === current);
+        var ts = $("[data-ts]", el);
+        if(i <= current && timestamps[i]){
+          ts.textContent = timestamps[i];
+        } else {
+          ts.textContent = "—";
+        }
+      });
+
+      // Rail : on remplit jusqu'au centre du dot actif/dernier fait
+      var railHeight = positionRail();
+      var progress = current < 0 ? 0 : clamp(current/(total-1), 0, 1);
+      railFill.style.transition = doAnimate ? "height 1.1s var(--ease)" : "none";
+      railFill.style.height = (progress * railHeight) + "px";
+
+      // Barre globale
+      bar.style.transition = doAnimate ? "width 1.4s var(--ease)" : "none";
+      bar.style.width = (progress * 100) + "%";
+
+      // ETA
+      var stage = stages[Math.max(0, current)];
+      var prev  = etaEl.textContent;
+      if(current < 0){
+        etaEl.textContent = "—";
+        etaLbl.textContent = "ETA";
+      } else {
+        etaEl.textContent = stage.eta;
+        etaLbl.textContent = stage.lbl;
+      }
+      if(doAnimate && etaEl.textContent !== prev){
+        etaEl.classList.remove("is-changed");
+        void etaEl.offsetWidth; // reflow pour rejouer l'anim
+        etaEl.classList.add("is-changed");
+      }
+
+      // Hint
+      if(current < 0){ hint.textContent = "En attente"; }
+      else if(current === total-1){ hint.textContent = "Mission terminée"; }
+      else { hint.textContent = "Étape " + (current+1) + " / " + total; }
+    };
+
+    var advance = function(){
+      current++;
+      if(current >= total){
+        current = total - 1;
+        finish();
+        return;
+      }
+      timestamps[current] = timeStr(new Date());
+      render(true);
+      if(current === total - 1){
+        // dernière étape : on laisse respirer puis on termine
+        timer = setTimeout(finish, 2200);
+      } else {
+        timer = setTimeout(advance, 2600);
+      }
+    };
+
+    var finish = function(){
+      stop();
+      render(true);
+      Toast.ok("Mission terminée & payée", "40 € versés sur le portefeuille.");
+    };
+
+    var play = function(){
+      if(playing) return;
+      if(current >= total - 1){ resetState(); }
+      playing = true;
+      playBtn.textContent = "⏸ Mettre en pause";
+      advance();
+    };
+    var pause = function(){
+      playing = false;
+      clearTimeout(timer);
+      playBtn.textContent = "▶ Reprendre";
+    };
+    var stop = function(){
+      playing = false;
+      clearTimeout(timer);
+      playBtn.textContent = "▶ Lancer la simulation";
+    };
+    var resetState = function(){
+      stop();
+      current = -1;
+      timestamps = [];
+      render(false);
+    };
+
+    playBtn.addEventListener("click", function(){ playing ? pause() : play(); });
+    resetBtn.addEventListener("click", resetState);
+
+    // Recalibre le rail au resize (layout change)
+    window.addEventListener("resize", function(){ render(false); });
+
+    // Init : on attend une frame pour que le layout soit mesurable
+    requestAnimationFrame(function(){ render(false); });
+  })();
+
+  /* ========================================================
+     12. SYSTÈME DE TOASTS
+  ======================================================== */
+  var Toast = (function(){
+    var stack = $("#toastStack");
+    var ICONS = {
+      ok:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>',
+      info: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v5h1"/></svg>'
+    };
+    var show = function(type, title, sub){
+      if(!stack) return;
+      var t = document.createElement("div");
+      t.className = "toast toast--"+type;
+      t.innerHTML = '<span class="toast__icon">'+(ICONS[type]||ICONS.info)+'</span><div><b>'+title+'</b>'+(sub?'<small>'+sub+'</small>':'')+'</div>';
+      stack.appendChild(t);
+      requestAnimationFrame(function(){ t.classList.add("is-visible"); });
+      setTimeout(function(){
+        t.classList.remove("is-visible");
+        setTimeout(function(){ if(t.parentNode) t.parentNode.removeChild(t); }, 500);
+      }, 3600);
+      // limite la pile
+      while(stack.children.length > 4){ stack.removeChild(stack.firstChild); }
+    };
+    return { ok: function(t,s){ show("ok", t, s); }, info: function(t,s){ show("info", t, s); } };
+  })();
+  window.Toast = Toast;
+
+  // Boutons CTA avec feedback toast
+  $$("[data-toast]").forEach(function(el){
+    el.addEventListener("click", function(e){
+      e.preventDefault();
+      var raw = el.getAttribute("data-toast");
+      var parts = raw.split("|");
+      Toast.ok(parts[0].trim(), parts[1] ? parts[1].trim() : "");
+    });
+  });
+
+})();
+</script>
+</body>
+</html>
