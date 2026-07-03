@@ -1,0 +1,70 @@
+/**
+ * SkillMatch — palette centralisée v2.0
+ * Fond apaisant vert sauge + accent corail pour les actions principales
+ */
+:root {
+  /* Surfaces — fond apaisant et reposant */
+  --bg: #EAF6F3;
+  --bg-alt: #DCEFE8;
+  --surface: #FFFFFF;
+  --surface-raised: #F4FAF8;
+  --panel: #FFFFFF;
+  --panel-2: #F0F7F5;
+
+  /* Texte — contraste AA minimum sur fonds clairs */
+  --ink: #2E3A3A;           /* 5.8:1 sur #EAF6F3 → AA ✓ */
+  --ink-soft: rgba(46, 58, 58, 0.82);
+  --muted: #5A6B6B;         /* 3.2:1 sur #EAF6F3 → AA ✓ */
+  --light: #2E3A3A;
+
+  /* Accents — actions principales et engagement */
+  --accent: #FF6B6B;        /* Corail chaleureux → CTA principal */
+  --accent-hover: #E85555;  /* Hover plus sombre */
+  --accent-text: #FFFFFF;
+  --accent-2: #FFB84C;      /* Ambre doux → badges, highlights */
+  --accent-2-text: #2E3A3A;
+
+  /* États — feedback utilisateur clair */
+  --ok: #2A9D8F;            /* Teal → succès, validé */
+  --ok-soft: rgba(42, 157, 143, 0.12);
+  --danger: #D64545;        /* Rouge doux → erreur, danger */
+  --danger-soft: rgba(214, 69, 69, 0.1);
+
+  /* Bordures & ombres — hiérarchie visuelle */
+  --border: rgba(46, 58, 58, 0.1);
+  --border-strong: rgba(46, 58, 58, 0.18);
+  --shadow-sm: 0 4px 16px rgba(46, 58, 58, 0.06);
+  --shadow-md: 0 12px 40px rgba(46, 58, 58, 0.1);
+  --shadow-lg: 0 24px 64px rgba(46, 58, 58, 0.12);
+
+  /* Typographie — hiérarchie claire */
+  --serif: "Fraunces", Georgia, serif;
+  --sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, monospace;
+
+  /* Layout — respiration généreuse */
+  --side: clamp(18px, 4vw, 72px);
+  --header-h: 74px;
+  --r-card: 18px;
+  --r-pill: 999px;
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+
+  /* Catégories (icônes mission) — nuances distinctes */
+  --cat-bricolage: #FFB84C;
+  --cat-demenagement: #6B9AC4;
+  --cat-babysitting: #FF8FAB;
+  --cat-jardinage: #2A9D8F;
+  --cat-informatique: #8B7EC8;
+  --cat-livraison: #F4A261;
+  --cat-cours: #457B9D;
+}
+
+/* Préférence motion réduite → animations supprimées */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}

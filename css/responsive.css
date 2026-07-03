@@ -1,6 +1,50 @@
-@media (max-width:1180px){
-  .site-nav .nav-link{display:none}.menu-toggle{display:grid}.hero{grid-template-columns:1fr}.phone-demo{justify-self:start}.app-layout{grid-template-columns:1fr}.side-panel{position:relative;top:auto;height:auto;display:grid;grid-template-columns:repeat(4,1fr)}.filters{grid-template-columns:1fr 1fr 1fr}.dashboard-grid,.conversation{grid-template-columns:1fr}
+@media (max-width: 1180px) {
+  .site-nav .nav-link { display: none; }
+  .site-nav .role-switch { display: none; }
+  .menu-toggle { display: grid; }
+  .hero { grid-template-columns: 1fr; }
+  .phone-demo { justify-self: center; max-width: 360px; }
+  .app-layout { grid-template-columns: 1fr; padding-inline: var(--side); }
+  .side-panel {
+    position: relative; top: auto; height: auto;
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    max-height: none;
+  }
+  .filters { grid-template-columns: 1fr 1fr 1fr; }
+  .dashboard-grid, .conversation { grid-template-columns: 1fr; }
+  .form-row { grid-template-columns: 1fr; }
 }
-@media (max-width:760px){
-  :root{--header-h:66px}.site-header{padding-inline:16px}.brand span:last-child{display:none}.hero{padding-inline:18px}.phone-demo__screen{min-height:540px}.grid--2,.grid--3,.grid--4{grid-template-columns:1fr}.section-head,.toolbar{display:grid}.side-panel{grid-template-columns:1fr 1fr}.app-layout{padding-inline:14px}.filters{grid-template-columns:1fr}.mission-card{grid-template-columns:1fr}.mission-card img{width:100%;height:170px}.mission-actions{justify-content:flex-start}.profile-hero{grid-template-columns:1fr}.profile-photo{width:100%;height:280px}.portfolio{grid-template-columns:1fr}.conversation-list{display:none}.chat-log{max-height:58svh}.bubble{max-width:88%}.hero h1{font-size:clamp(2.8rem,16vw,4.8rem)}
+
+@media (max-width: 760px) {
+  :root { --header-h: 64px; }
+  .site-header { padding-inline: 16px; }
+  .brand span:last-child { display: none; }
+  .hero { padding-inline: 18px; min-height: auto; padding-bottom: 40px; }
+  .phone-demo { width: 100%; }
+  .phone-demo__screen { min-height: 440px; }
+  .grid--2, .grid--3, .grid--4 { grid-template-columns: 1fr; }
+  .section-head, .toolbar { display: grid; }
+  .toolbar__actions { width: 100%; }
+  .toolbar__actions .btn { flex: 1; justify-content: center; }
+  .side-panel { grid-template-columns: 1fr 1fr; }
+  .app-layout { padding-inline: 14px; }
+  .filters { grid-template-columns: 1fr; }
+  .mission-card { grid-template-columns: 1fr; }
+  .mission-card img { width: 100%; height: 160px; }
+  .mission-actions { justify-content: stretch; }
+  .mission-actions .btn { flex: 1; }
+  .profile-hero { grid-template-columns: 1fr; }
+  .profile-photo { width: 100%; height: 240px; }
+  .portfolio { grid-template-columns: 1fr; }
+  .conversation-list { max-height: 200px; }
+  .chat-log { max-height: 50svh; }
+  .bubble { max-width: 88%; }
+  .hero h1 { font-size: clamp(2.2rem, 12vw, 3.6rem); }
+  .swipe-stage { height: 420px; }
+  .modal__footer { flex-direction: column; }
+  .modal__footer .btn { width: 100%; }
+}
+
+@media (min-width: 761px) and (max-width: 1180px) {
+  .side-panel button span:last-child { display: none; }
 }

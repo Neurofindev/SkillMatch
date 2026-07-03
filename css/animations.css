@@ -1,15 +1,63 @@
-@keyframes fadeUp{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:none}}
-@keyframes grow{from{transform:scaleY(.05)}to{transform:scaleY(1)}}
-@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(182,255,60,.3)}50%{box-shadow:0 0 0 12px rgba(182,255,60,0)}}
-@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
-@keyframes mapMove{from{offset-distance:0%}to{offset-distance:100%}}
-.reveal{opacity:0;transform:translateY(22px);transition:opacity .75s var(--ease),transform .75s var(--ease)}
-.reveal.is-visible{opacity:1;transform:none}
-.hero__eyebrow,.hero h1,.hero__copy,.hero__cta,.phone-demo{animation:fadeUp .9s var(--ease) both}
-.hero h1{animation-delay:.08s}.hero__copy{animation-delay:.18s}.hero__cta{animation-delay:.28s}.phone-demo{animation-delay:.34s}
-.swipe-card{transition:transform .35s var(--ease),opacity .28s ease}
-.map-runner{offset-path:path("M45 210 C145 95 265 120 355 55 C455 -15 570 70 635 150");animation:mapMove 9s linear infinite}
-.is-paused .map-runner{animation-play-state:paused}
-@media (prefers-reduced-motion:reduce){
-  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(22px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes grow {
+  from { transform: scaleY(0.05); }
+  to { transform: scaleY(1); }
+}
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 107, 107, 0.25); }
+  50% { box-shadow: 0 0 0 10px rgba(255, 107, 107, 0); }
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+@keyframes mapMove {
+  from { offset-distance: 0%; }
+  to { offset-distance: 100%; }
+}
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+@keyframes scaleIn {
+  from { transform: scale(0.6); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.reveal {
+  opacity: 0; transform: translateY(22px);
+  transition: opacity 0.75s var(--ease), transform 0.75s var(--ease);
+}
+.reveal.is-visible { opacity: 1; transform: none; }
+
+.hero__eyebrow, .hero h1, .hero__copy, .hero__cta, .phone-demo {
+  animation: fadeUp 0.9s var(--ease) both;
+}
+.hero h1 { animation-delay: 0.08s; }
+.hero__copy { animation-delay: 0.18s; }
+.hero__cta { animation-delay: 0.28s; }
+.phone-demo { animation-delay: 0.34s; animation: fadeUp 0.9s var(--ease) both, float 5s ease-in-out 1.2s infinite; }
+
+.swipe-card { transition: transform 0.35s var(--ease), opacity 0.28s ease; }
+.map-runner {
+  offset-path: path("M45 210 C145 95 265 120 355 55 C455 -15 570 70 635 150");
+  animation: mapMove 9s linear infinite;
+}
+.is-paused .map-runner { animation-play-state: paused; }
+
+.mission-card.app-card--hover { transition: transform 0.25s var(--ease), box-shadow 0.25s var(--ease); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
 }
