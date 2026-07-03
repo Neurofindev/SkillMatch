@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SkillMatch - Ta prochaine mission, a un swipe pres.</title>
+  <meta name="description" content="SkillMatch associe la simplicite d'une appli de rencontre a la rigueur d'un outil pro : contractualisation, paiement, reputation, suivi en temps reel." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/animations.css" />
+  <link rel="stylesheet" href="css/responsive.css" />
+</head>
+<body>
+  <div class="scroll-progress" id="scrollProgress" aria-hidden="true"></div>
+  <header class="site-header" id="siteHeader">
+    <a class="brand" href="#accueil" data-route="accueil" aria-label="SkillMatch accueil">
+      <span class="brand__mark">S</span><span>SkillMatch</span>
+    </a>
+    <nav class="site-nav" aria-label="Navigation principale">
+      <button class="nav-link is-active" data-route="accueil">Accueil</button>
+      <button class="nav-link" data-route="decouverte">Decouverte</button>
+      <button class="nav-link" data-route="recherche">Recherche</button>
+      <button class="nav-link" data-route="missions">Missions</button>
+      <button class="nav-link" data-route="messages">Messages</button>
+      <button class="nav-link" data-route="wallet">Wallet</button>
+      <button class="icon-btn" data-route="notifications" aria-label="Notifications"><span id="notificationDot" class="status-dot"></span>!</button>
+      <button class="avatar-btn" data-route="profil" aria-label="Profil"><img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=120&q=80" alt=""></button>
+    </nav>
+    <button class="menu-toggle" id="menuToggle" aria-label="Ouvrir le menu" aria-expanded="false"><span></span><span></span></button>
+  </header>
+
+  <aside class="mobile-menu" id="mobileMenu" aria-hidden="true">
+    <button class="mobile-menu__close" id="menuClose" aria-label="Fermer le menu">x</button>
+    <nav aria-label="Navigation mobile">
+      <button data-route="accueil">Accueil</button>
+      <button data-route="decouverte">Decouverte</button>
+      <button data-route="recherche">Recherche</button>
+      <button data-route="missions">Mes missions</button>
+      <button data-route="candidatures">Mes candidatures</button>
+      <button data-route="messages">Messages</button>
+      <button data-route="notifications">Notifications</button>
+      <button data-route="wallet">Wallet</button>
+      <button data-route="profil">Profil</button>
+      <button data-route="parametres">Parametres</button>
+    </nav>
+  </aside>
+
+  <main id="app" tabindex="-1"></main>
+  <div class="toast-stack" id="toastStack" aria-live="polite" aria-atomic="true"></div>
+
+  <script src="js/app.js"></script>
+  <script src="js/navigation.js"></script>
+  <script src="js/notifications.js"></script>
+  <script src="js/swipe.js"></script>
+  <script src="js/tracker.js"></script>
+  <script src="js/dashboard.js"></script>
+  <script src="js/wallet.js"></script>
+  <script src="js/profile.js"></script>
+</body>
+</html>

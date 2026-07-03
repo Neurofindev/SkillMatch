@@ -1,0 +1,6 @@
+@media (max-width:1180px){
+  .site-nav .nav-link{display:none}.menu-toggle{display:grid}.hero{grid-template-columns:1fr}.phone-demo{justify-self:start}.app-layout{grid-template-columns:1fr}.side-panel{position:relative;top:auto;height:auto;display:grid;grid-template-columns:repeat(4,1fr)}.filters{grid-template-columns:1fr 1fr 1fr}.dashboard-grid,.conversation{grid-template-columns:1fr}
+}
+@media (max-width:760px){
+  :root{--header-h:66px}.site-header{padding-inline:16px}.brand span:last-child{display:none}.hero{padding-inline:18px}.phone-demo__screen{min-height:540px}.grid--2,.grid--3,.grid--4{grid-template-columns:1fr}.section-head,.toolbar{display:grid}.side-panel{grid-template-columns:1fr 1fr}.app-layout{padding-inline:14px}.filters{grid-template-columns:1fr}.mission-card{grid-template-columns:1fr}.mission-card img{width:100%;height:170px}.mission-actions{justify-content:flex-start}.profile-hero{grid-template-columns:1fr}.profile-photo{width:100%;height:280px}.portfolio{grid-template-columns:1fr}.conversation-list{display:none}.chat-log{max-height:58svh}.bubble{max-width:88%}.hero h1{font-size:clamp(2.8rem,16vw,4.8rem)}
+}
