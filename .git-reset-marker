@@ -1,0 +1,7 @@
+Ce fichier est un marqueur pour indiquer que le reset a été demandé.
+Pour effectuer le reset complet via GitHub, utilisez la commande Git :
+
+git reset --hard 96d9e5b037798acfaeebc0929cee651ae32cde6f
+git push --force-with-lease
+
+Ou utilisez GitHub UI pour reset la branche main au commit : 96d9e5b037798acfaeebc0929cee651ae32cde6f
