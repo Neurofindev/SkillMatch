@@ -1,6 +1,6 @@
 # Déploiement gratuit — Supabase Cloud et Cloudflare Pages
 
-Statut au 2026-09-01 : procédure validée localement, déploiement externe non exécuté. Aucun jeton Cloudflare, aucune CLI Wrangler authentifiée, aucun `SUPABASE_ACCESS_TOKEN` et aucun projet Supabase Cloud lié n’étaient disponibles. Il n’existe donc aucune URL de production vérifiée.
+Statut au 2026-09-02 : déploiement Git intégré actif sur [https://skillmatch-wo9.pages.dev](https://skillmatch-wo9.pages.dev), projet Supabase Cloud `omsrvbgurjfpqqompacp` lié et 14 migrations appliquées. Le seed local n’a pas été envoyé.
 
 Cette procédure cible une SPA statique Cloudflare Pages et un projet Supabase Free. Elle n’ajoute ni Pages Function, ni serveur intermédiaire, ni service payant.
 
@@ -37,9 +37,9 @@ La procédure suit la [documentation officielle des environnements](https://supa
    - buckets `avatars`, `mission-attachments` et `message-attachments` avec leurs limites MIME/taille ;
    - publication Realtime limitée à `messages` et `notifications` ;
    - aucun utilisateur, rôle modérateur ou contenu du seed local.
-4. Dans Auth > URL Configuration, définir temporairement le `Site URL` avec l’URL Pages finale et ajouter les retours réellement utilisés, par exemple :
-   - `https://<PROJET>.pages.dev/auth/callback` ;
-   - `https://<PROJET>.pages.dev/reinitialisation`.
+4. Dans Auth > URL Configuration, définir le `Site URL` Pages final et ajouter les retours réellement utilisés :
+   - `https://<PROJET>.pages.dev/auth/retour` ;
+   - `https://<PROJET>.pages.dev/mot-de-passe/nouveau`.
 5. Conserver la confirmation e-mail active. Le SMTP intégré n’est pas adapté au public : configurer un SMTP externe, puis tester inscription, confirmation et récupération avec de vraies boîtes avant ouverture.
 
 Les seules valeurs destinées au navigateur sont l’URL du projet et sa clé publishable. Une clé `service_role`, un jeton personnel, le mot de passe PostgreSQL ou les identifiants SMTP ne doivent jamais apparaître dans Cloudflare Pages comme variable `VITE_*`.
@@ -50,8 +50,8 @@ Avec l’intégration Git dans Workers & Pages :
 
 | Réglage               | Valeur                        |
 | --------------------- | ----------------------------- |
-| Framework             | Vite ou None                  |
-| Branche de production | branche explicitement choisie |
+| Framework             | React (Vite)                  |
+| Branche de production | `main`                        |
 | Commande de build     | `npm run build`               |
 | Répertoire de sortie  | `dist`                        |
 | Répertoire racine     | racine de SkillMatch          |
@@ -62,9 +62,9 @@ Ajouter deux variables de build :
 - `VITE_SUPABASE_URL=https://<PROJECT_REF>.supabase.co` ;
 - `VITE_SUPABASE_PUBLISHABLE_KEY=<clé publishable du projet>`.
 
-Ne pas ajouter de secret backend. Le build copie `public/_headers` et `public/_redirects` dans `dist`. `_redirects` renvoie toutes les routes React vers `index.html`; `_headers` applique CSP, anti-frame, HSTS, `nosniff`, COOP et Permissions-Policy aux réponses statiques. L’application ne contient pas de dossier `functions` ni de `_worker.js`.
+Ne pas ajouter de secret backend. Le build copie `public/_headers` dans `dist`. Cloudflare Pages applique son fallback SPA natif lorsqu’un `index.html` existe sans page `404.html`; il ne faut pas publier la règle `/* /index.html 200`, rejetée comme boucle infinie. `_headers` applique CSP, anti-frame, HSTS, `nosniff`, COOP et Permissions-Policy aux réponses statiques. L’application ne contient pas de dossier `functions` ni de `_worker.js`.
 
-## 4. Contrôles de préproduction
+## 4. Contrôles de production
 
 Sur l’URL preview exacte :
 

@@ -10,10 +10,17 @@ async function text(path) {
   return (await readFile(path, 'utf8')).replace(/\r\n/g, '\n');
 }
 
+async function exists(path) {
+  try {
+    await access(path);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 const publicHeaders = await text('public/_headers');
 const builtHeaders = await text('dist/_headers');
-const publicRedirects = (await text('public/_redirects')).trim();
-const builtRedirects = (await text('dist/_redirects')).trim();
 const envExample = await text('.env.example');
 
 await access('dist/index.html');
@@ -23,10 +30,9 @@ assert(
   'dist/_headers ne correspond pas à public/_headers.',
 );
 assert(
-  publicRedirects === '/* /index.html 200',
-  'Le fallback SPA public est invalide.',
+  !(await exists('public/_redirects')) && !(await exists('dist/_redirects')),
+  'Cloudflare Pages fournit le fallback SPA natif : aucun _redirects en boucle ne doit être publié.',
 );
-assert(builtRedirects === publicRedirects, 'Le fallback SPA manque dans dist.');
 
 const requiredHeaderFragments = [
   "default-src 'self'",
@@ -84,5 +90,5 @@ assert(
 );
 
 console.log(
-  'Configuration de déploiement : SPA, en-têtes, CSP, build et variables publiques valides.',
+  'Configuration de déploiement : fallback SPA natif, en-têtes, CSP, build et variables publiques valides.',
 );

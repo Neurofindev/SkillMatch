@@ -10,13 +10,13 @@ Le MVP est une SPA React persistée par Supabase. Le prototype historique n’es
 - TanStack Query pour les données serveur, React Hook Form et Zod pour les formulaires ;
 - Supabase PostgreSQL, Auth, Storage et Realtime avec migrations, RPC et RLS versionnées ;
 - Vitest, Testing Library, Playwright, Axe et pgTAP ;
-- cible d’hébergement statique : Cloudflare Pages Free, sortie `dist`.
+- hébergement statique : Cloudflare Pages Free, sortie `dist`.
 
 ## Prérequis
 
 - Node.js 24 et npm ;
 - Docker Desktop pour Supabase local ;
-- Git recommandé ; le dossier livré est actuellement non suivi dans son dépôt parent ;
+- Git recommandé ; SkillMatch possède son dépôt dédié sur la branche `main` ;
 - aucun compte cloud n’est nécessaire pour le développement local.
 
 ## Installation locale
@@ -82,11 +82,11 @@ Les résultats reproductibles et les limites de couverture se trouvent dans [doc
 
 ## Déploiement gratuit
 
-Le chemin cible est : dépôt Git → Cloudflare Pages statique → Supabase Cloud Free. Les paramètres Pages sont `npm run build` comme commande et `dist` comme répertoire de sortie. Seules `VITE_SUPABASE_URL` et `VITE_SUPABASE_PUBLISHABLE_KEY` sont configurées côté Pages. Les migrations distantes sont prévisualisées avec `supabase db push --dry-run`, puis appliquées avec `supabase db push`, sans `--include-seed`.
+Le chemin déployé est : dépôt GitHub `Neurofindev/SkillMatch` → Cloudflare Pages statique → Supabase Cloud Free. L’application est disponible sur [https://skillmatch-wo9.pages.dev](https://skillmatch-wo9.pages.dev). Les paramètres Pages sont `npm run build` comme commande et `dist` comme répertoire de sortie. Seules `VITE_SUPABASE_URL` et `VITE_SUPABASE_PUBLISHABLE_KEY` sont configurées côté Pages. Les 14 migrations distantes ont été appliquées sans `--include-seed`.
 
 La procédure complète, les redirections Auth, les contrôles post-déploiement et le retour arrière sont dans [docs/deployment.md](docs/deployment.md). Les quotas vérifiés et alertes d’exploitation sont dans [docs/free-tier-constraints.md](docs/free-tier-constraints.md).
 
-Aucun accès authentifié Cloudflare ou Supabase Cloud n’était disponible pendant l’audit final : aucun déploiement externe n’a donc été exécuté et aucune URL de production n’est annoncée.
+Les déploiements automatiques de `main` sont actifs. La route profonde `/connexion`, les en-têtes CSP/HSTS/anti-frame et le cache immuable des actifs ont été observés sur la vraie URL Pages.
 
 ## Documentation
 
@@ -98,11 +98,10 @@ Aucun accès authentifié Cloudflare ou Supabase Cloud n’était disponible pen
 
 ## Limites connues avant ouverture publique
 
-- délivrabilité e-mail externe et SMTP personnalisé non testés ;
-- en-têtes HTTP/CSP présents et validés statiquement, mais pas observés sur une vraie URL Cloudflare Pages ;
+- SMTP Brevo configuré, mais délivrabilité et parcours externes confirmation/récupération encore à tester de bout en bout ;
 - Firefox, WebKit, appareils physiques et lecteur d’écran réel non exécutés ;
 - aucune campagne de charge, de reprise après incident cloud ou de Realtime multi-région ;
 - suppression définitive Auth/Storage et durées légales de conservation encore opérées manuellement ;
 - modération adaptée à un petit MVP, sans astreinte ni délai garanti.
 
-Le projet est validé localement, mais ces limites empêchent de le qualifier de prêt pour une ouverture publique sans contrôle de préproduction.
+Le projet est déployé et validé techniquement ; les limites restantes empêchent encore de le qualifier de prêt pour une ouverture publique générale.
