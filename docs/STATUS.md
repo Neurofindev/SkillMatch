@@ -33,7 +33,7 @@ Phase courante : 12 — documentation, déploiement gratuit et audit final
 
 ## Partiel ou non testé
 
-- E-mails : confirmation Mailpit locale validée ; SMTP Brevo configuré, mais délivrabilité et parcours externes non encore testés de bout en bout.
+- E-mails : confirmation Mailpit locale et confirmation externe via Brevo validées de bout en bout ; récupération de mot de passe externe non encore testée.
 - Navigateurs : Chromium validé ; Firefox, WebKit, appareils physiques et lecteur d’écran réel non testés.
 - Exploitation : aucune charge, reprise cloud, restauration de sauvegarde ou recette Realtime multi-région.
 - Confidentialité : export et demande de suppression honnêtes ; effacement/anonymisation définitifs Auth/Storage encore opérés manuellement.
@@ -47,10 +47,10 @@ Phase courante : 12 — documentation, déploiement gratuit et audit final
 - Auth : SMTP Brevo actif, cinq modèles transactionnels français enregistrés, URL du site et trois retours exacts autorisés.
 - Cloudflare Pages : projet `skillmatch`, branche `main`, déploiements automatiques activés.
 - URL de production : [https://skillmatch-wo9.pages.dev](https://skillmatch-wo9.pages.dev).
-- Révision déployée vérifiée : `af4718a8364c864948a15e1483b8d98fac52e2bd`.
+- Révision fonctionnelle déployée vérifiée : `4afae5c2d614badbbb8238931c0b4adc37c8fcb0`.
 
 ## Décision de sortie
 
-Le MVP est techniquement validé et publié. Il ne doit pas être présenté comme prêt pour une ouverture publique générale avant validation de la délivrabilité e-mail externe, d’une sauvegarde/restauration et des contrôles navigateurs/lecteur d’écran restants.
+Le MVP est techniquement validé et publié. Il ne doit pas être présenté comme prêt pour une ouverture publique générale avant validation de la récupération de mot de passe externe, d’une sauvegarde/restauration et des contrôles navigateurs/lecteur d’écran restants.
 
 PHASE 12 : VALIDÉE

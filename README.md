@@ -98,7 +98,7 @@ Les déploiements automatiques de `main` sont actifs. La route profonde `/connex
 
 ## Limites connues avant ouverture publique
 
-- SMTP Brevo configuré, mais délivrabilité et parcours externes confirmation/récupération encore à tester de bout en bout ;
+- SMTP Brevo : confirmation externe validée de bout en bout ; récupération de mot de passe externe encore à tester ;
 - Firefox, WebKit, appareils physiques et lecteur d’écran réel non exécutés ;
 - aucune campagne de charge, de reprise après incident cloud ou de Realtime multi-région ;
 - suppression définitive Auth/Storage et durées légales de conservation encore opérées manuellement ;

@@ -1,6 +1,6 @@
 # Déploiement gratuit — Supabase Cloud et Cloudflare Pages
 
-Statut au 2026-09-02 : déploiement Git intégré actif sur [https://skillmatch-wo9.pages.dev](https://skillmatch-wo9.pages.dev), projet Supabase Cloud `omsrvbgurjfpqqompacp` lié et 14 migrations appliquées. Le seed local n’a pas été envoyé.
+Statut au 2026-09-02 : déploiement Git intégré actif sur [https://skillmatch-wo9.pages.dev](https://skillmatch-wo9.pages.dev), projet Supabase Cloud `omsrvbgurjfpqqompacp` lié et 14 migrations appliquées. Le seed local n’a pas été envoyé. Une inscription externe a produit un e-mail Brevo ouvert et cliqué, puis un compte Supabase effectivement confirmé.
 
 Cette procédure cible une SPA statique Cloudflare Pages et un projet Supabase Free. Elle n’ajoute ni Pages Function, ni serveur intermédiaire, ni service payant.
 
