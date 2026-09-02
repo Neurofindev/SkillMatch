@@ -86,7 +86,7 @@ export function OnboardingPage() {
   const client = getSupabaseClient();
   const navigate = useNavigate();
   const headingRef = useRef<HTMLHeadingElement>(null);
-  const hydrated = useRef(false);
+  const hydratedUserId = useRef<string | null>(null);
   const [currentStep, setCurrentStep] = useState(1);
   const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved'>(
     'idle',
@@ -134,8 +134,14 @@ export function OnboardingPage() {
   });
 
   useEffect(() => {
-    if (hydrated.current || draftQuery.isLoading) return;
-    hydrated.current = true;
+    if (
+      !userId ||
+      !draftQuery.isFetched ||
+      hydratedUserId.current === userId
+    ) {
+      return;
+    }
+    hydratedUserId.current = userId;
     if (draftQuery.data) {
       const parsed = onboardingSchema.safeParse(draftQuery.data.payload);
       if (parsed.success) {
@@ -146,7 +152,7 @@ export function OnboardingPage() {
         });
       }
     }
-  }, [draftQuery.data, draftQuery.isLoading, reset]);
+  }, [draftQuery.data, draftQuery.isFetched, reset, userId]);
 
   useEffect(() => {
     headingRef.current?.focus();

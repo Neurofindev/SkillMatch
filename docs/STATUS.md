@@ -13,6 +13,7 @@ Phase courante : 12 — documentation, déploiement gratuit et audit final
 - Cloudflare Pages fournit le fallback SPA natif ; le build `dist` contient une CSP compatible Supabase Cloud, HSTS, anti-frame, `nosniff`, COOP, Permissions-Policy et le cache immuable des actifs hachés.
 - `npm run verify:full` est autonome : il reconstruit la base, démarre son preview, joue tous les parcours puis nettoie le serveur.
 - Deux défauts découverts pendant l’audit ont été corrigés : timeout trop court sur les routes lazy et perte possible d’une saisie très rapide au premier écran du wizard mission.
+- La régression de l’onboarding publiée le 2 septembre a été corrigée : le catalogue de compétences est désormais une donnée de référence migrée en production et la reprise du brouillon attend la restauration effective de la session.
 
 ## Résultats exacts
 
@@ -20,8 +21,8 @@ Phase courante : 12 — documentation, déploiement gratuit et audit final
 - `npm audit --audit-level=high` : 0 vulnérabilité.
 - `npm run verify:full` : succès, code 0.
 - TypeScript/ESLint : 0 erreur, 0 avertissement.
-- Vitest : 26 fichiers, 74 tests réussis, 0 échec, 0 ignoré.
-- Base : 14 migrations rejouées, 3 buckets, lint sans problème et 2 smoke tests réussis.
+- Vitest : 27 fichiers, 75 tests réussis, 0 échec, 0 ignoré.
+- Base : 15 migrations rejouées, 3 buckets, lint sans problème et 2 smoke tests réussis.
 - pgTAP : 10 fichiers, 471 assertions réussies, 0 échec.
 - Concurrence : 1 acceptation, 1 rejet, 1 match, 1 conversation, 1 accord, 2 membres.
 - Harnais persistés : 7 parcours applicatifs multi-comptes plus 1 test de concurrence, couvrant Auth/onboarding, missions, candidatures, match/accord, Realtime, avis/dashboard et modération.
@@ -43,7 +44,7 @@ Phase courante : 12 — documentation, déploiement gratuit et audit final
 ## Déploiement
 
 - Supabase local : exécuté et validé.
-- Supabase Cloud : projet `omsrvbgurjfpqqompacp` lié, 14 migrations alignées et lint distant sans erreur.
+- Supabase Cloud : projet `omsrvbgurjfpqqompacp` lié, 15 migrations alignées et lint distant sans erreur.
 - Auth : SMTP Brevo actif, cinq modèles transactionnels français enregistrés, URL du site et trois retours exacts autorisés.
 - Cloudflare Pages : projet `skillmatch`, branche `main`, déploiements automatiques activés.
 - URL de production : [https://skillmatch-wo9.pages.dev](https://skillmatch-wo9.pages.dev).

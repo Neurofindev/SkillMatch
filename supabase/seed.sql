@@ -145,13 +145,6 @@ values
 insert into public.user_roles (user_id, role, granted_by)
 values ('d0000000-0000-0000-0000-000000000004', 'moderator', null);
 
-insert into public.skills (slug, name, category)
-values
-  ('accessibilite-web', 'Accessibilité web', 'Numérique'),
-  ('developpement-react', 'Développement React', 'Numérique'),
-  ('redaction-francaise', 'Rédaction française', 'Communication'),
-  ('support-evenementiel', 'Support événementiel', 'Services');
-
 insert into public.profile_skills (profile_id, skill_id, declared_level, years_experience)
 select 'd0000000-0000-0000-0000-000000000002', s.id, 'advanced', 4
 from public.skills s
