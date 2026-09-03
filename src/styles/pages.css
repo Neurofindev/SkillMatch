@@ -916,6 +916,7 @@
   border-bottom: 1px solid var(--sm-color-line);
   background: var(--sm-color-surface);
   padding: var(--sm-space-3) var(--sm-space-4);
+  flex-wrap: wrap;
 }
 
 .app-topbar p {
@@ -926,6 +927,23 @@
 
 .app-topbar .button {
   flex: 0 0 auto;
+}
+
+.app-topbar-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--sm-space-2);
+}
+
+@media (max-width: 420px) {
+  .app-topbar-actions {
+    width: 100%;
+  }
+
+  .app-topbar-actions .button {
+    flex: 1 1 auto;
+  }
 }
 
 .app-main {

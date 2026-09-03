@@ -8,6 +8,8 @@ export interface AuthUser {
 
 export interface AuthProfile {
   avatarPath: string | null;
+  canHire: boolean;
+  canWork: boolean;
   displayName: string;
   id: string;
   onboardingCompleted: boolean;

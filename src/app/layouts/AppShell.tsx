@@ -1,6 +1,6 @@
 import { LogOut } from 'lucide-react';
 import { useState } from 'react';
-import { Outlet, useNavigate } from 'react-router-dom';
+import { Link, Outlet, useNavigate } from 'react-router-dom';
 
 import { useAuth } from '@/app/providers/AuthProvider';
 import {
@@ -48,13 +48,27 @@ export function AppShell() {
             <Badge tone="success">Session active</Badge>
             <p>{auth.profile?.displayName ?? auth.user?.email}</p>
           </div>
-          <Button
-            isLoading={isSigningOut}
-            onClick={() => void signOut()}
-            variant="secondary"
-          >
-            <LogOut aria-hidden="true" size={18} /> Déconnexion
-          </Button>
+          <div className="app-topbar-actions">
+            <Link
+              className="button button-primary"
+              to={
+                auth.profile?.canHire
+                  ? '/espace/missions/nouvelle'
+                  : '/espace/profil#capacites'
+              }
+            >
+              {auth.profile?.canHire
+                ? 'Publier une mission'
+                : 'Activer la publication'}
+            </Link>
+            <Button
+              isLoading={isSigningOut}
+              onClick={() => void signOut()}
+              variant="secondary"
+            >
+              <LogOut aria-hidden="true" size={18} /> Déconnexion
+            </Button>
+          </div>
         </header>
         <main className="app-main" id="contenu" tabIndex={-1}>
           <Outlet />

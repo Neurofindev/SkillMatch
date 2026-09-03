@@ -34,8 +34,8 @@ function NavigationLinks({ compact = false }: { compact?: boolean }) {
   const mobilePaths = new Set([
     '/espace',
     '/espace/decouvrir',
+    '/espace/missions',
     '/espace/messages',
-    '/espace/notifications',
     '/espace/profil',
   ]);
   return applicationNavigation

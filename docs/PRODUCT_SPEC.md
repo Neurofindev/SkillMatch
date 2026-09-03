@@ -41,7 +41,7 @@ Un même compte peut publier et candidater. L’interface peut adapter ses racco
 
 1. Inscription : création du compte, confirmation réelle de l’e-mail et déclaration d’âge minimum de 18 ans.
 2. Onboarding : activation de « trouver une mission », « publier une mission », ou des deux ; acceptation des règles de sécurité.
-3. Profil et compétences : identité publique minimale, présentation, compétences structurées, zone facultative selon les modes souhaités et disponibilités.
+3. Profil et compétences : identité publique minimale, présentation, compétences saisies librement avec niveau déclaratif, zone facultative selon les modes souhaités et disponibilités. La normalisation interne sert uniquement au matching et n’impose aucun catalogue prédéfini à l’utilisateur.
 4. Publication ou découverte : le client publie une mission ; le talent cherche, filtre ou consulte des recommandations explicables.
 5. Candidature : le talent envoie un message, ses disponibilités et, s’il le souhaite, un montant proposé purement informatif.
 6. Présélection : le client compare les candidatures selon des critères utiles et non discriminatoires.

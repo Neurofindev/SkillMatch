@@ -89,7 +89,7 @@ Les noms exacts seront figés par migrations. Entités prévues :
 
 - profiles : extension publique minimale de auth.users, statut d’onboarding et déclaration 18+ ;
 - account_capabilities : find_missions et publish_missions pour le compte unique ;
-- skills et profile_skills : taxonomie et niveaux déclaratifs ;
+- skills et profile_skills : compétences saisies librement, normalisées en interne pour le matching, et niveaux déclaratifs ;
 - availability_rules : disponibilités structurées ;
 - missions : propriétaire, mode local/remote/hybrid, zone publique, calendrier, description, budget informatif, statut et règles de modération ;
 - mission_skills : compétences recherchées et importance ;

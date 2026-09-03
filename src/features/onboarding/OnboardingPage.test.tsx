@@ -8,10 +8,10 @@ import { OnboardingPage } from '@/features/onboarding/OnboardingPage';
 const mocks = vi.hoisted(() => ({
   auth: {
     refreshProfile: vi.fn(),
-    session: null as null | { user: { user_metadata: Record<string, unknown> } },
-    user: undefined as
-      | undefined
-      | { emailConfirmed: boolean; id: string },
+    session: null as null | {
+      user: { user_metadata: Record<string, unknown> };
+    },
+    user: undefined as undefined | { emailConfirmed: boolean; id: string },
   },
   getOnboardingDraft: vi.fn(),
   listSkills: vi.fn(),
@@ -26,6 +26,7 @@ vi.mock('@/lib/supabase/client', () => ({
 }));
 
 vi.mock('@/features/profiles/profileApi', () => ({
+  findOrCreateSkill: vi.fn(),
   getFrenchProfileError: () => 'Une erreur est survenue.',
   getOnboardingDraft: mocks.getOnboardingDraft,
   isUsernameAvailable: vi.fn(),

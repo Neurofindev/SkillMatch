@@ -47,36 +47,36 @@ Risque résiduel : `service_role` et les propriétaires de base contournent RLS 
 
 ## Matrice RLS applicative
 
-| Ressource                   | Lecture                                                             | Écriture autorisée                                                    |
-| --------------------------- | ------------------------------------------------------------------- | --------------------------------------------------------------------- |
-| `profiles`                  | propriétaire ou modération ; projection publique active via RPC     | champs publics par propriétaire actif ; suspension par RPC modération |
-| `onboarding_drafts`         | propriétaire uniquement                                             | propriétaire uniquement                                               |
-| `skills`                    | compétences actives, y compris anonyme                              | modération accordée côté serveur                                      |
-| `profile_skills`            | propriétaire ou profil publiable                                    | propriétaire                                                          |
-| `availability_slots`        | propriétaire, visibilité publique, participant matché ou modération | propriétaire                                                          |
-| `missions`                  | visible, propriétaire/participant historique ou modération          | propriétaire actif ; statut et masquage par RPC                       |
-| `mission_drafts`            | propriétaire uniquement                                             | propriétaire uniquement                                               |
-| `mission_attachments`       | propriétaire uniquement                                             | propriétaire, parent propre, maximum trois                            |
-| `mission_private_locations` | propriétaire, participants du match ou modération                   | propriétaire tant que mission éditable                                |
-| `mission_skills`            | mêmes lecteurs que la mission                                       | propriétaire tant que mission éditable                                |
-| `applications`              | candidat, propriétaire de mission ou modération                     | soumission confirmée et transitions par RPC uniquement                |
-| `application_swipes`        | propriétaire de la mission auteur de la décision                    | RPC client uniquement, sur candidatures réellement reçues             |
-| `swipes`                    | auteur                                                              | RPC talent uniquement                                                 |
-| `matches`                   | deux participants ou modération                                     | RPC d’acceptation uniquement                                          |
-| `agreements`                | deux participants ou modération                                     | confirmations/transitions par RPC uniquement                          |
-| `conversations`             | membres ou modération                                               | création par RPC d’acceptation uniquement                             |
-| `conversation_members`      | membres ou modération                                               | chaque membre modifie seulement son état de lecture/archivage         |
-| `messages`                  | membres ou modération                                               | membre auteur, match actif et absence de blocage                      |
-| `mission_events`            | participants ou modération                                          | fonctions serveur uniquement ; journal append-only                    |
-| `completion_confirmations`  | participants ou modération                                          | participant sous sa propre identité                                   |
-| `notifications`             | destinataire ou modération                                          | destinataire : `read_at` seulement ; création serveur                 |
-| `reviews`                   | public via projections bornées                                      | `submit_review` uniquement après mission et match terminés            |
-| `favorites`                 | auteur                                                              | auteur, sauf sur sa propre mission                                    |
-| `blocks`                    | bloqueur via projection contrôlée                                   | `set_profile_block` uniquement                                        |
-| `user_roles`                | utilisateur concerné ou modération                                  | aucune écriture API normale                                           |
-| `reports`                   | auteur ou modération                                                | `submit_report` ; état uniquement via RPC modération                  |
-| `moderation_actions`        | modération                                                          | ajout transactionnel par `moderate_report`, jamais client             |
-| `account_action_requests`   | auteur ou modération                                                | demande via RPC ; traitement serveur requis                           |
+| Ressource                   | Lecture                                                             | Écriture autorisée                                                      |
+| --------------------------- | ------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| `profiles`                  | propriétaire ou modération ; projection publique active via RPC     | champs publics par propriétaire actif ; suspension par RPC modération   |
+| `onboarding_drafts`         | propriétaire uniquement                                             | propriétaire uniquement                                                 |
+| `skills`                    | compétences actives, y compris anonyme                              | création normalisée par RPC authentifiée ; modération directe seulement |
+| `profile_skills`            | propriétaire ou profil publiable                                    | propriétaire                                                            |
+| `availability_slots`        | propriétaire, visibilité publique, participant matché ou modération | propriétaire                                                            |
+| `missions`                  | visible, propriétaire/participant historique ou modération          | propriétaire actif ; statut et masquage par RPC                         |
+| `mission_drafts`            | propriétaire uniquement                                             | propriétaire uniquement                                                 |
+| `mission_attachments`       | propriétaire uniquement                                             | propriétaire, parent propre, maximum trois                              |
+| `mission_private_locations` | propriétaire, participants du match ou modération                   | propriétaire tant que mission éditable                                  |
+| `mission_skills`            | mêmes lecteurs que la mission                                       | propriétaire tant que mission éditable                                  |
+| `applications`              | candidat, propriétaire de mission ou modération                     | soumission confirmée et transitions par RPC uniquement                  |
+| `application_swipes`        | propriétaire de la mission auteur de la décision                    | RPC client uniquement, sur candidatures réellement reçues               |
+| `swipes`                    | auteur                                                              | RPC talent uniquement                                                   |
+| `matches`                   | deux participants ou modération                                     | RPC d’acceptation uniquement                                            |
+| `agreements`                | deux participants ou modération                                     | confirmations/transitions par RPC uniquement                            |
+| `conversations`             | membres ou modération                                               | création par RPC d’acceptation uniquement                               |
+| `conversation_members`      | membres ou modération                                               | chaque membre modifie seulement son état de lecture/archivage           |
+| `messages`                  | membres ou modération                                               | membre auteur, match actif et absence de blocage                        |
+| `mission_events`            | participants ou modération                                          | fonctions serveur uniquement ; journal append-only                      |
+| `completion_confirmations`  | participants ou modération                                          | participant sous sa propre identité                                     |
+| `notifications`             | destinataire ou modération                                          | destinataire : `read_at` seulement ; création serveur                   |
+| `reviews`                   | public via projections bornées                                      | `submit_review` uniquement après mission et match terminés              |
+| `favorites`                 | auteur                                                              | auteur, sauf sur sa propre mission                                      |
+| `blocks`                    | bloqueur via projection contrôlée                                   | `set_profile_block` uniquement                                          |
+| `user_roles`                | utilisateur concerné ou modération                                  | aucune écriture API normale                                             |
+| `reports`                   | auteur ou modération                                                | `submit_report` ; état uniquement via RPC modération                    |
+| `moderation_actions`        | modération                                                          | ajout transactionnel par `moderate_report`, jamais client               |
+| `account_action_requests`   | auteur ou modération                                                | demande via RPC ; traitement serveur requis                             |
 
 Toutes ces tables ont RLS activée et au moins une policy explicite. Le rôle anonyme ne reçoit de grants de table que sur `skills`, `reviews`, `profile_skills` et `availability_slots`, dont les policies limitent les lignes publiques. Le profil public complet passe par `get_public_profiles`, qui n’expose ni majorité, ni onboarding, ni suppression logique. Son indicateur `email_verified` est dérivé de la confirmation effective dans Supabase Auth.
 
@@ -84,45 +84,46 @@ Une suspension ne supprime pas l’historique nécessaire aux participants. Elle
 
 ## RPC exposées
 
-| RPC                           | Rôle                                      | Garanties principales                                                              |
-| ----------------------------- | ----------------------------------------- | ---------------------------------------------------------------------------------- |
-| `accept_application`          | authentifié, propriétaire de mission      | verrou, versions, idempotence, un match, conversation et notifications atomiques   |
-| `transition_application`      | candidat/propriétaire                     | retrait ou revue seulement, jamais acceptation                                     |
-| `transition_mission`          | propriétaire/participant selon transition | versions, autorité, audit, double confirmation avant fin                           |
-| `confirm_agreement`           | participant                               | confirmation distincte, verrouillée, idempotente et auditée                        |
-| `transition_agreement`        | participant                               | seulement après confirmations et état cohérent du match                            |
-| `get_public_profiles`         | anonyme/authentifié                       | projection de colonnes explicitement publiables                                    |
-| `get_application_counts`      | propriétaire authentifié                  | agrégation des candidatures de ses missions                                        |
-| `get_unread_counts`           | authentifié                               | notifications et messages non lus calculés                                         |
-| `get_dashboard_stats`         | authentifié                               | statistiques issues des données du compte                                          |
-| `get_reputation`              | anonyme/authentifié                       | moyenne réelle, score normalisé et volumes sources                                 |
-| `get_weekly_ranking`          | authentifié                               | événements de fin réels sur sept jours, formule versionnée                         |
-| `submit_review`               | participant                               | auteur/destinataire dérivés, clôture exigée, notes bornées et unicité              |
-| `list_review_opportunities`   | participant                               | collaborations terminées appartenant à l’appelant uniquement                       |
-| `list_received_reviews`       | anonyme/authentifié                       | avis publics paginés et identité publique minimale                                 |
-| `get_reputation_summary`      | anonyme/authentifié                       | moyenne, volume, distribution, missions terminées et état nouveau profil           |
-| `get_dashboard_overview`      | authentifié                               | agrégats limités au compte et adaptés à ses capacités                              |
-| `list_dashboard_deadlines`    | authentifié                               | échéances des matches actifs de l’appelant uniquement                              |
-| `is_username_available`       | authentifié                               | normalisation et unicité insensible à la casse, sans exposer les profils privés    |
-| `save_profile`                | propriétaire authentifié                  | profil, compétences et disponibilité validés et remplacés atomiquement             |
-| `save_mission`                | propriétaire avec capacité publier        | mission/compétences/fichiers atomiques, version et publication validée             |
-| `archive_mission`             | propriétaire                              | version optimiste et statuts archivables seulement                                 |
-| `search_missions`             | authentifié                               | projection paginée, agrégée, bloquée et sans distance pour remote                  |
-| `submit_application`          | talent authentifié                        | confirmation explicite, identité serveur, doublon/auto-candidature/blocage refusés |
-| `list_applications`           | candidat/propriétaire                     | projection paginée limitée aux parties, score stocké et profil public              |
-| `record_mission_swipe`        | talent authentifié                        | passer/enregistrer/intéressé persisté ; aucune candidature créée                   |
-| `undo_last_mission_swipe`     | talent authentifié                        | annule seulement sa dernière décision et le favori créé par ce parcours            |
-| `record_application_swipe`    | propriétaire de mission                   | passer/comparer sans statut final, maximum trois comparaisons, version optimiste   |
-| `undo_last_application_swipe` | propriétaire de mission                   | annule la dernière décision passer/comparer encore réversible                      |
-| `submit_report`               | authentifié actif                         | cible accessible, confirmation, bornes, déduplication et cadence                   |
-| `set_profile_block`           | authentifié actif                         | identité serveur, cible distincte, verrou commun et écriture contrôlée             |
-| `list_blocked_profiles`       | authentifié                               | blocages de l’appelant et identité publique minimale                               |
-| `get_moderation_access`       | authentifié                               | booléen dérivé exclusivement de `user_roles`                                       |
-| `list_moderation_reports`     | modérateur                                | file paginée, projection limitée et refus `42501` au rôle normal                   |
-| `get_moderation_report`       | modérateur                                | cible limitée sans Auth, e-mail ni localisation exacte                             |
-| `moderate_report`             | modérateur                                | verrou, version, transition, masquage/suspension et audit atomiques                |
-| `get_account_export`          | authentifié                               | export allow-listé des données de l’appelant                                       |
-| `request_account_deletion`    | authentifié                               | confirmation exacte et demande persistée sans faux succès d’effacement             |
+| RPC                           | Rôle                                      | Garanties principales                                                                                                  |
+| ----------------------------- | ----------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `accept_application`          | authentifié, propriétaire de mission      | verrou, versions, idempotence, un match, conversation et notifications atomiques                                       |
+| `transition_application`      | candidat/propriétaire                     | retrait ou revue seulement, jamais acceptation                                                                         |
+| `transition_mission`          | propriétaire/participant selon transition | versions, autorité, audit, double confirmation avant fin                                                               |
+| `confirm_agreement`           | participant                               | confirmation distincte, verrouillée, idempotente et auditée                                                            |
+| `transition_agreement`        | participant                               | seulement après confirmations et état cohérent du match                                                                |
+| `get_public_profiles`         | anonyme/authentifié                       | projection de colonnes explicitement publiables                                                                        |
+| `get_application_counts`      | propriétaire authentifié                  | agrégation des candidatures de ses missions                                                                            |
+| `get_unread_counts`           | authentifié                               | notifications et messages non lus calculés                                                                             |
+| `get_dashboard_stats`         | authentifié                               | statistiques issues des données du compte                                                                              |
+| `get_reputation`              | anonyme/authentifié                       | moyenne réelle, score normalisé et volumes sources                                                                     |
+| `get_weekly_ranking`          | authentifié                               | événements de fin réels sur sept jours, formule versionnée                                                             |
+| `submit_review`               | participant                               | auteur/destinataire dérivés, clôture exigée, notes bornées et unicité                                                  |
+| `list_review_opportunities`   | participant                               | collaborations terminées appartenant à l’appelant uniquement                                                           |
+| `list_received_reviews`       | anonyme/authentifié                       | avis publics paginés et identité publique minimale                                                                     |
+| `get_reputation_summary`      | anonyme/authentifié                       | moyenne, volume, distribution, missions terminées et état nouveau profil                                               |
+| `get_dashboard_overview`      | authentifié                               | agrégats limités au compte et adaptés à ses capacités                                                                  |
+| `list_dashboard_deadlines`    | authentifié                               | échéances des matches actifs de l’appelant uniquement                                                                  |
+| `is_username_available`       | authentifié                               | normalisation et unicité insensible à la casse, sans exposer les profils privés                                        |
+| `find_or_create_skill`        | authentifié                               | longueur/texte validés, normalisation serveur, déduplication, maximum 30 créations par 24 h et aucune écriture directe |
+| `save_profile`                | propriétaire authentifié                  | profil, compétences et disponibilité validés et remplacés atomiquement                                                 |
+| `save_mission`                | propriétaire avec capacité publier        | mission/compétences/fichiers atomiques, version et publication validée                                                 |
+| `archive_mission`             | propriétaire                              | version optimiste et statuts archivables seulement                                                                     |
+| `search_missions`             | authentifié                               | projection paginée, agrégée, bloquée et sans distance pour remote                                                      |
+| `submit_application`          | talent authentifié                        | confirmation explicite, identité serveur, doublon/auto-candidature/blocage refusés                                     |
+| `list_applications`           | candidat/propriétaire                     | projection paginée limitée aux parties, score stocké et profil public                                                  |
+| `record_mission_swipe`        | talent authentifié                        | passer/enregistrer/intéressé persisté ; aucune candidature créée                                                       |
+| `undo_last_mission_swipe`     | talent authentifié                        | annule seulement sa dernière décision et le favori créé par ce parcours                                                |
+| `record_application_swipe`    | propriétaire de mission                   | passer/comparer sans statut final, maximum trois comparaisons, version optimiste                                       |
+| `undo_last_application_swipe` | propriétaire de mission                   | annule la dernière décision passer/comparer encore réversible                                                          |
+| `submit_report`               | authentifié actif                         | cible accessible, confirmation, bornes, déduplication et cadence                                                       |
+| `set_profile_block`           | authentifié actif                         | identité serveur, cible distincte, verrou commun et écriture contrôlée                                                 |
+| `list_blocked_profiles`       | authentifié                               | blocages de l’appelant et identité publique minimale                                                                   |
+| `get_moderation_access`       | authentifié                               | booléen dérivé exclusivement de `user_roles`                                                                           |
+| `list_moderation_reports`     | modérateur                                | file paginée, projection limitée et refus `42501` au rôle normal                                                       |
+| `get_moderation_report`       | modérateur                                | cible limitée sans Auth, e-mail ni localisation exacte                                                                 |
+| `moderate_report`             | modérateur                                | verrou, version, transition, masquage/suspension et audit atomiques                                                    |
+| `get_account_export`          | authentifié                               | export allow-listé des données de l’appelant                                                                           |
+| `request_account_deletion`    | authentifié                               | confirmation exacte et demande persistée sans faux succès d’effacement                                                 |
 
 ## Effet d’un blocage
 

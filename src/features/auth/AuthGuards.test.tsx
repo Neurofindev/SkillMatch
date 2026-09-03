@@ -72,6 +72,8 @@ describe('gardes Auth et onboarding', () => {
     mockedAuth.current = state({
       profile: {
         avatarPath: null,
+        canHire: true,
+        canWork: true,
         displayName: 'Camille',
         id: 'user-1',
         onboardingCompleted: true,
@@ -90,6 +92,8 @@ describe('gardes Auth et onboarding', () => {
     mockedAuth.current = state({
       profile: {
         avatarPath: null,
+        canHire: true,
+        canWork: true,
         displayName: 'Camille',
         id: 'user-1',
         onboardingCompleted: true,

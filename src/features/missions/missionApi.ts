@@ -177,7 +177,9 @@ export async function listMissionSkillOptions(
 ): Promise<SkillOption[]> {
   const { data, error } = await client
     .from('skills')
-    .select('id, slug, name, category, is_active, created_at, updated_at')
+    .select(
+      'id, slug, name, normalized_name, category, is_active, created_at, updated_at',
+    )
     .eq('is_active', true)
     .order('category')
     .order('name');

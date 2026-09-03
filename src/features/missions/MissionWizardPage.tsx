@@ -27,6 +27,8 @@ import {
 import { ErrorState } from '@/components/ui/FeedbackStates';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { useToast } from '@/components/ui/Toast';
+import { SkillsEditor } from '@/features/profiles/ProfileFields';
+import { findOrCreateSkill } from '@/features/profiles/profileApi';
 import {
   draftPayloadToValues,
   getFrenchMissionError,
@@ -50,7 +52,6 @@ import {
   SKILL_LEVELS,
   WORK_MODES,
   type MissionFormValues,
-  type SkillLevel,
 } from '@/features/missions/missionSchemas';
 import {
   formatMissionDate,
@@ -346,6 +347,20 @@ export function MissionWizardPage() {
       />
     );
   }
+  if (!auth.profile?.canHire) {
+    return (
+      <section className="mission-wizard-page">
+        <ErrorState
+          action={{
+            label: 'Activer la publication',
+            onClick: () => navigate('/espace/profil#capacites'),
+          }}
+          description="Votre compte reste unique : activez « publier une mission » ou « trouver et publier » dans votre profil."
+          title="La publication n’est pas encore activée"
+        />
+      </section>
+    );
+  }
 
   const renderStep = () => {
     switch (currentStep) {
@@ -413,83 +428,23 @@ export function MissionWizardPage() {
                 </Select>
               )}
             </FormField>
-            <fieldset className="skills-fieldset">
-              <legend>Compétences requises *</legend>
-              <p className="field-description">
-                Sélectionnez de 1 à 12 compétences et ajustez leur niveau.
-              </p>
-              {form.formState.errors.skills?.message ? (
-                <p className="field-error" role="alert">
-                  {form.formState.errors.skills.message}
-                </p>
-              ) : null}
-              <div className="skills-options">
-                {catalogQuery.isLoading ? (
-                  <Skeleton label="Chargement des compétences" lines={4} />
-                ) : null}
-                {(catalogQuery.data ?? []).map((skill) => {
-                  const selected = values.skills.find(
-                    (item) => item.skillId === skill.id,
-                  );
-                  return (
-                    <div className="skill-option" key={skill.id}>
-                      <Checkbox
-                        checked={Boolean(selected)}
-                        label={
-                          <>
-                            <strong>{skill.name}</strong>
-                            <small>{skill.category}</small>
-                          </>
-                        }
-                        onChange={(event) => {
-                          const next = event.target.checked
-                            ? [
-                                ...values.skills,
-                                {
-                                  level: values.requiredLevel,
-                                  skillId: skill.id,
-                                },
-                              ]
-                            : values.skills.filter(
-                                (item) => item.skillId !== skill.id,
-                              );
-                          form.setValue('skills', next, {
-                            shouldDirty: true,
-                            shouldValidate: true,
-                          });
-                        }}
-                      />
-                      {selected ? (
-                        <Select
-                          aria-label={`Niveau requis pour ${skill.name}`}
-                          onChange={(event) => {
-                            form.setValue(
-                              'skills',
-                              values.skills.map((item) =>
-                                item.skillId === skill.id
-                                  ? {
-                                      ...item,
-                                      level: event.target.value as SkillLevel,
-                                    }
-                                  : item,
-                              ),
-                              { shouldDirty: true, shouldValidate: true },
-                            );
-                          }}
-                          value={selected.level}
-                        >
-                          {SKILL_LEVELS.map((level) => (
-                            <option key={level} value={level}>
-                              {formatSkillLevel(level)}
-                            </option>
-                          ))}
-                        </Select>
-                      ) : null}
-                    </div>
-                  );
-                })}
-              </div>
-            </fieldset>
+            {catalogQuery.isLoading ? (
+              <Skeleton label="Chargement de vos compétences" lines={2} />
+            ) : (
+              <SkillsEditor
+                defaultLevel={values.requiredLevel}
+                error={form.formState.errors.skills?.message}
+                onCreate={(name) => findOrCreateSkill(client!, name)}
+                onChange={(skills) =>
+                  form.setValue('skills', skills, {
+                    shouldDirty: true,
+                    shouldValidate: true,
+                  })
+                }
+                options={catalogQuery.data ?? []}
+                selected={values.skills}
+              />
+            )}
           </div>
         );
       case 3:

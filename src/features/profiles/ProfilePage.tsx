@@ -37,6 +37,7 @@ import {
 } from '@/features/profiles/profileSchemas';
 import {
   detailsToFormValues,
+  findOrCreateSkill,
   getFrenchProfileError,
   getOwnProfileDetails,
   isUsernameAvailable,
@@ -283,7 +284,7 @@ export function ProfilePage() {
             {(field) => <Textarea {...field} {...register('bio')} rows={7} />}
           </FormField>
 
-          <fieldset className="choice-fieldset">
+          <fieldset className="choice-fieldset" id="capacites">
             <legend>Capacités du compte *</legend>
             {Object.entries(capabilityLabels).map(([value, label]) => (
               <label key={value}>
@@ -355,6 +356,7 @@ export function ProfilePage() {
 
           <SkillsEditor
             error={errors.skills?.message}
+            onCreate={(name) => findOrCreateSkill(client!, name)}
             onChange={(skills) =>
               setValue('skills', skills, {
                 shouldDirty: true,

@@ -1396,6 +1396,7 @@ export type Database = {
           id: number;
           is_active: boolean;
           name: string;
+          normalized_name: string | null;
           slug: string;
           updated_at: string;
         };
@@ -1405,6 +1406,7 @@ export type Database = {
           id?: never;
           is_active?: boolean;
           name: string;
+          normalized_name?: string | null;
           slug: string;
           updated_at?: string;
         };
@@ -1414,6 +1416,7 @@ export type Database = {
           id?: never;
           is_active?: boolean;
           name?: string;
+          normalized_name?: string | null;
           slug?: string;
           updated_at?: string;
         };
@@ -1584,6 +1587,14 @@ export type Database = {
         }[];
       };
       delete_message: { Args: { p_message_id: string }; Returns: string };
+      find_or_create_skill: {
+        Args: { p_name: string };
+        Returns: {
+          category: string;
+          id: number;
+          name: string;
+        }[];
+      };
       get_account_export: { Args: never; Returns: Json };
       get_application_counts: {
         Args: never;

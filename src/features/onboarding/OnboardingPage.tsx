@@ -26,6 +26,7 @@ import {
   type OnboardingValues,
 } from '@/features/profiles/profileSchemas';
 import {
+  findOrCreateSkill,
   getFrenchProfileError,
   getOnboardingDraft,
   isUsernameAvailable,
@@ -134,11 +135,7 @@ export function OnboardingPage() {
   });
 
   useEffect(() => {
-    if (
-      !userId ||
-      !draftQuery.isFetched ||
-      hydratedUserId.current === userId
-    ) {
+    if (!userId || !draftQuery.isFetched || hydratedUserId.current === userId) {
       return;
     }
     hydratedUserId.current = userId;
@@ -359,6 +356,7 @@ export function OnboardingPage() {
         return (
           <SkillsEditor
             error={errors.skills?.message}
+            onCreate={(name) => findOrCreateSkill(client!, name)}
             onChange={(skills) =>
               setValue('skills', skills, { shouldValidate: true })
             }

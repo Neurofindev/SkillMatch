@@ -179,6 +179,7 @@ const password = `Phase05!${randomUUID()}Aa9`;
 const clientEmail = `phase05-client-${suffix}@example.test`;
 const talentEmail = `phase05-talent-${suffix}@example.test`;
 const missionTitle = `Mission remote réelle ${suffix}`;
+const missionSkillName = `Conception responsive ${suffix}`;
 const clientAccount = await createConfirmedAccount({
   ...local,
   capability: 'publish',
@@ -214,10 +215,9 @@ try {
   await clientPage
     .getByRole('heading', { name: 'Compétences requises' })
     .waitFor();
-  await clientPage
-    .locator('.skill-option input[type="checkbox"]')
-    .first()
-    .check();
+  await clientPage.getByLabel('Ajouter une compétence').fill(missionSkillName);
+  await clientPage.getByRole('button', { name: 'Ajouter' }).click();
+  await clientPage.getByText(missionSkillName).waitFor();
   await clientPage.getByRole('button', { name: /Suivant/ }).click();
   await clientPage.getByRole('heading', { name: 'Mode de mission' }).waitFor();
   await clientPage.locator('input[value="remote"]').check();
@@ -299,6 +299,18 @@ try {
       missionSkills.error ??
       new Error('Les compétences de mission sont absentes.')
     );
+  }
+  const enteredSkill = await clientAccount.client
+    .from('skills')
+    .select('id, name')
+    .in(
+      'id',
+      missionSkills.data.map((skill) => skill.skill_id),
+    )
+    .eq('name', missionSkillName)
+    .single();
+  if (enteredSkill.error) {
+    throw enteredSkill.error;
   }
   const wizardDrafts = await clientAccount.client
     .from('mission_drafts')

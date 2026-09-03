@@ -42,6 +42,7 @@ export function MyMissionsPage() {
   const queryClient = useQueryClient();
   const { notify } = useToast();
   const userId = auth.user?.id ?? '';
+  const canHire = Boolean(auth.profile?.canHire);
   const missionsQuery = useQuery({
     enabled: Boolean(client && userId),
     queryFn: () => listOwnMissions(client!, userId),
@@ -132,10 +133,33 @@ export function MyMissionsPage() {
             statuts réels.
           </p>
         </div>
-        <Link className="button button-primary" to="/espace/missions/nouvelle">
-          <Plus aria-hidden="true" size={18} /> Créer une mission
+        <Link
+          className="button button-primary"
+          to={
+            canHire ? '/espace/missions/nouvelle' : '/espace/profil#capacites'
+          }
+        >
+          <Plus aria-hidden="true" size={18} />{' '}
+          {canHire ? 'Créer une mission' : 'Activer la publication'}
         </Link>
       </header>
+
+      {!canHire ? (
+        <Card className="form-alert">
+          <h2>Activez la capacité « publier une mission »</h2>
+          <p>
+            Votre compte peut conserver ses activités actuelles et ajouter la
+            publication de missions depuis le profil, sans créer un second
+            compte.
+          </p>
+          <Link
+            className="button button-secondary"
+            to="/espace/profil#capacites"
+          >
+            Modifier les capacités du compte
+          </Link>
+        </Card>
+      ) : null}
 
       <aside className="mission-non-payment-note">
         <strong>Le budget reste informatif.</strong>
@@ -333,9 +357,15 @@ export function MyMissionsPage() {
             ) : (
               <EmptyState
                 action={{
-                  label: 'Créer ma première mission',
+                  label: canHire
+                    ? 'Créer ma première mission'
+                    : 'Activer la publication',
                   onClick: () =>
-                    window.location.assign('/espace/missions/nouvelle'),
+                    window.location.assign(
+                      canHire
+                        ? '/espace/missions/nouvelle'
+                        : '/espace/profil#capacites',
+                    ),
                 }}
                 description="Les nouveaux comptes ne sont pas pénalisés : commencez par un brouillon sauvegardable."
                 title="Aucune mission enregistrée"

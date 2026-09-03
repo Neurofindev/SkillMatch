@@ -69,7 +69,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
     void client
       .from('profiles')
-      .select('id, username, display_name, avatar_path, onboarding_completed')
+      .select(
+        'id, username, display_name, avatar_path, onboarding_completed, can_hire, can_work',
+      )
       .eq('id', userId)
       .maybeSingle()
       .then(({ data, error }) => {
@@ -83,6 +85,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           data
             ? {
                 avatarPath: data.avatar_path,
+                canHire: data.can_hire,
+                canWork: data.can_work,
                 displayName: data.display_name,
                 id: data.id,
                 onboardingCompleted: data.onboarding_completed,

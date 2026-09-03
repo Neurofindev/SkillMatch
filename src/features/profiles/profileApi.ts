@@ -8,6 +8,7 @@ import type {
 } from '@/features/profiles/profileSchemas';
 
 export type SkillOption = Database['public']['Tables']['skills']['Row'];
+export type SkillChoice = Pick<SkillOption, 'category' | 'id' | 'name'>;
 export type OwnProfile = Database['public']['Tables']['profiles']['Row'];
 export type AvailabilitySlot =
   Database['public']['Tables']['availability_slots']['Row'];
@@ -76,6 +77,19 @@ export async function listSkills(
     .order('name');
   if (error) throw error;
   return data;
+}
+
+export async function findOrCreateSkill(
+  client: SupabaseClient<Database>,
+  name: string,
+): Promise<SkillChoice> {
+  const { data, error } = await client.rpc('find_or_create_skill', {
+    p_name: name,
+  });
+  if (error) throw error;
+  const skill = data?.[0];
+  if (!skill) throw new Error('SKILL_CREATE_FAILED');
+  return skill;
 }
 
 export async function getOnboardingDraft(

@@ -5,6 +5,19 @@
 -- Every visible identity and mission is labelled “Démonstration”. Seeded e-mail
 -- addresses are deliberately unconfirmed, so no verified identity is invented.
 
+-- Local-only demonstration skills. Production skills are entered by users.
+insert into public.skills (slug, name, category, is_active)
+values
+  ('accessibilite-web', 'Accessibilité web', 'Numérique', true),
+  ('developpement-react', 'Développement React', 'Numérique', true),
+  ('redaction-francaise', 'Rédaction française', 'Communication', true),
+  ('support-evenementiel', 'Support événementiel', 'Services', true)
+on conflict (slug) do update
+set
+  name = excluded.name,
+  category = excluded.category,
+  is_active = true;
+
 insert into auth.users (
   id,
   aud,
