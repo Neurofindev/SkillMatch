@@ -49,7 +49,7 @@ Phase courante : 12 — documentation, déploiement gratuit et audit final
 - Auth : SMTP Brevo actif, cinq modèles transactionnels français enregistrés, URL du site et trois retours exacts autorisés.
 - Cloudflare Pages : projet `skillmatch`, branche `main`, déploiements automatiques activés.
 - URL de production : [https://skillmatch-wo9.pages.dev](https://skillmatch-wo9.pages.dev).
-- Révision fonctionnelle déployée vérifiée : `4afae5c2d614badbbb8238931c0b4adc37c8fcb0`.
+- Révision fonctionnelle déployée vérifiée : `0677183e70dc2dc71dd0ad68862c46bd38ca8dff`.
 
 ## Décision de sortie
 
