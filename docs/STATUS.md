@@ -2,7 +2,7 @@
 
 Dernière mise à jour : 2026-09-03
 Phase courante : 12 — documentation, déploiement gratuit et audit final
-État : validée localement ; migration cloud appliquée, frontend en attente de publication GitHub
+État : validée localement et déployée ; recette de production partielle effectuée
 
 ## Terminé
 
@@ -52,8 +52,8 @@ Phase courante : 12 — documentation, déploiement gratuit et audit final
 - Auth : SMTP Brevo actif, cinq modèles transactionnels français enregistrés, URL du site et trois retours exacts autorisés.
 - Cloudflare Pages : projet `skillmatch`, branche `main`, déploiements automatiques activés.
 - URL de production : [https://skillmatch-wo9.pages.dev](https://skillmatch-wo9.pages.dev).
-- Révision fonctionnelle actuellement déployée vérifiée : `0677183e70dc2dc71dd0ad68862c46bd38ca8dff`.
-- Révision locale validée en attente de publication : `7cf6f7e`.
+- Révision fonctionnelle déployée : `7cf6f7ec4b093370eff8b452f2df56b7c6403b22`.
+- Build Cloudflare vérifié avec succès : `fae506636123ed3bd6c5cb97ddbc9c0f66a32c1c` ; le bundle public contient l’action « Échanger sur la candidature » et les RPC de conversation par candidature.
 
 ## Décision de sortie
 
