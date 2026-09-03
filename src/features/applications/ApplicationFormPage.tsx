@@ -24,6 +24,7 @@ import {
   listApplications,
   submitApplication,
 } from '@/features/applications/applicationApi';
+import { getApplicationEligibility } from '@/features/applications/applicationEligibility';
 import {
   applicationFormSchema,
   type ApplicationFormValues,
@@ -139,18 +140,6 @@ export function ApplicationFormPage() {
       />
     );
   }
-  if (mission.owner.id === auth.user?.id) {
-    return (
-      <EmptyState
-        action={{
-          label: 'Gérer la mission',
-          onClick: () => navigate(`/espace/missions/${mission.id}`),
-        }}
-        description="Le propriétaire ne peut pas candidater à sa propre mission."
-        title="Candidature impossible"
-      />
-    );
-  }
   const existing = existingQuery.data?.items[0];
   if (existing) {
     return (
@@ -161,6 +150,31 @@ export function ApplicationFormPage() {
         }}
         description="Une candidature active existe déjà pour cette mission."
         title="Candidature déjà envoyée"
+      />
+    );
+  }
+  const eligibility = getApplicationEligibility(mission, {
+    canWork: Boolean(auth.profile?.canWork),
+    id: auth.user?.id ?? '',
+  });
+  if (!eligibility.allowed) {
+    const action =
+      eligibility.reason === 'owner'
+        ? {
+            label: 'Gérer la mission',
+            onClick: () => navigate(`/espace/missions/${mission.id}`),
+          }
+        : eligibility.reason === 'work-capability-required'
+          ? {
+              label: 'Modifier mes capacités',
+              onClick: () => navigate('/espace/profil#capacites'),
+            }
+          : undefined;
+    return (
+      <EmptyState
+        {...(action ? { action } : {})}
+        description={eligibility.description}
+        title={eligibility.title}
       />
     );
   }

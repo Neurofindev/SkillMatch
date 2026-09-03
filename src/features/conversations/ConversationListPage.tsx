@@ -122,7 +122,7 @@ export function ConversationListPage() {
           ? 'Aucune conversation ne correspond à cette recherche.'
           : archived
             ? 'Les conversations que vous archivez apparaîtront ici.'
-            : 'Une conversation privée apparaîtra après l’acceptation réelle d’une candidature.'
+            : 'Une conversation privée apparaîtra lorsqu’un participant ouvre l’échange depuis une candidature réelle.'
       }
       icon={archived ? <Archive /> : <MessageCircle />}
       title={archived ? 'Aucune conversation archivée' : 'Aucune conversation'}
@@ -148,8 +148,9 @@ export function ConversationListPage() {
           <p className="eyebrow">Échanges privés</p>
           <h1>Messages</h1>
           <p>
-            Seuls les participants d’une collaboration réelle peuvent lire et
-            écrire dans sa conversation.
+            Seuls les participants d’une candidature réelle peuvent lire la
+            conversation. L’écriture dépend de l’état actuel de la candidature
+            ou de la collaboration.
           </p>
         </div>
       </header>

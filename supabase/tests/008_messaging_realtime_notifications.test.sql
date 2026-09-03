@@ -44,9 +44,10 @@ insert into public.matches (
   'd0000000-0000-0000-0000-000000000002'
 );
 
-insert into public.conversations (id, match_id, mission_id)
+insert into public.conversations (id, application_id, match_id, mission_id)
 values (
   'f4000000-0000-0000-0000-000000000008',
+  'f2000000-0000-0000-0000-000000000008',
   'f3000000-0000-0000-0000-000000000008',
   'f1000000-0000-0000-0000-000000000008'
 );

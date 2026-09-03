@@ -67,11 +67,24 @@ export const conversationWorkspaceSchema = z.object({
     lastReadAt: z.string().nullable(),
   }),
   counterpart: participantSchema,
-  match: z.object({
+  application: z.object({
     id: z.string().uuid(),
-    role: z.enum(['client', 'talent']),
-    status: z.enum(['active', 'cancelled', 'completed']),
+    status: z.enum([
+      'submitted',
+      'viewed',
+      'shortlisted',
+      'accepted',
+      'rejected',
+      'withdrawn',
+    ]),
   }),
+  match: z
+    .object({
+      id: z.string().uuid(),
+      role: z.enum(['client', 'talent']),
+      status: z.enum(['active', 'cancelled', 'completed']),
+    })
+    .nullable(),
   mission: z.object({
     id: z.string().uuid(),
     status: z.string(),

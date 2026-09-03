@@ -5,6 +5,7 @@ import {
   BriefcaseBusiness,
   GitCompareArrows,
   MapPin,
+  MessageCircle,
   ShieldCheck,
   Star,
 } from 'lucide-react';
@@ -36,6 +37,12 @@ import {
   formatApplicationStatus,
   formatProposal,
 } from '@/features/applications/applicationView';
+import {
+  conversationQueryKeys,
+  getApplicationConversationState,
+  getFrenchConversationError,
+  getOrCreateApplicationConversation,
+} from '@/features/conversations/conversationApi';
 import { formatSkillLevel } from '@/features/missions/missionView';
 import { getAvatarPublicUrl } from '@/features/profiles/avatar';
 import { ReportDialog } from '@/features/safety/ReportDialog';
@@ -63,6 +70,14 @@ export function ApplicationDetailPage() {
     queryKey: applicationQueryKeys.detail(applicationId),
   });
   const result = detailQuery.data;
+  const conversationStateQuery = useQuery({
+    enabled: Boolean(client && result),
+    queryFn: () => getApplicationConversationState(client!, result!.item.id),
+    queryKey: [
+      ...applicationQueryKeys.detail(applicationId),
+      'conversation-state',
+    ],
+  });
   const actionMutation = useMutation({
     mutationFn: async (
       action: 'accept' | 'compare' | 'reject' | 'shortlist' | 'withdraw',
@@ -108,6 +123,21 @@ export function ApplicationDetailPage() {
         queryKey: applicationQueryKeys.all,
       });
       navigate('/espace/candidatures?vue=recues');
+    },
+  });
+  const conversationMutation = useMutation({
+    mutationFn: async () => {
+      if (!client || !result) throw new Error('APPLICATION_NOT_FOUND');
+      return getOrCreateApplicationConversation(client, result.item.id);
+    },
+    onError: (error) => setActionError(getFrenchConversationError(error)),
+    onMutate: () => setActionError(''),
+    onSuccess: async (conversationId) => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: applicationQueryKeys.all }),
+        queryClient.invalidateQueries({ queryKey: conversationQueryKeys.all }),
+      ]);
+      void navigate(`/espace/messages/${conversationId}`);
     },
   });
 
@@ -334,17 +364,25 @@ export function ApplicationDetailPage() {
               utilisée dans le score.
             </small>
           </Card>
-          {item.conversationId ? (
-            <Link
-              className="button button-primary"
-              to={`/espace/messages?conversation=${item.conversationId}`}
+          {conversationStateQuery.isLoading ? (
+            <Skeleton label="Vérification de la conversation" lines={1} />
+          ) : conversationStateQuery.data?.conversationId ||
+            conversationStateQuery.data?.canStart ||
+            item.conversationId ? (
+            <Button
+              isLoading={conversationMutation.isPending}
+              onClick={() => conversationMutation.mutate()}
             >
-              Ouvrir la conversation
-            </Link>
+              <MessageCircle aria-hidden="true" size={18} /> Échanger sur la
+              candidature
+            </Button>
+          ) : conversationStateQuery.isError ? (
+            <p className="field-error" role="alert">
+              {getFrenchConversationError(conversationStateQuery.error)}
+            </p>
           ) : (
             <p className="inline-empty">
-              La conversation sera accessible uniquement si une future
-              acceptation crée un match réel.
+              Cette candidature est clôturée sans conversation existante.
             </p>
           )}
         </aside>

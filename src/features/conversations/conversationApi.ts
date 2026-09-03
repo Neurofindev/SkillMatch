@@ -1,4 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { z } from 'zod';
 
 import type { UploadedMessageAttachment } from '@/features/conversations/attachments';
 import {
@@ -33,7 +34,10 @@ export interface ConversationListItem {
     deletedAt: string | null;
     id: string | null;
   };
-  match: { id: string; status: Database['public']['Enums']['match_status'] };
+  match: {
+    id: string;
+    status: Database['public']['Enums']['match_status'];
+  } | null;
   mission: {
     id: string;
     status: Database['public']['Enums']['mission_status'];
@@ -88,7 +92,10 @@ function mapConversation(row: ConversationRow): ConversationListItem {
       deletedAt: row.last_message_deleted_at ?? null,
       id: row.last_message_id ?? null,
     },
-    match: { id: row.match_id, status: row.match_status },
+    match:
+      row.match_id && row.match_status
+        ? { id: row.match_id, status: row.match_status }
+        : null,
     mission: {
       id: row.mission_id,
       status: row.mission_status,
@@ -146,7 +153,11 @@ export function getFrenchConversationError(error: unknown): string {
   if (message.includes('block')) {
     return 'Un blocage entre les participants empêche tout nouveau message.';
   }
-  if (message.includes('active match')) {
+  if (
+    message.includes('active match') ||
+    message.includes('read-only') ||
+    message.includes('active application')
+  ) {
     return 'Cette conversation est désormais en lecture seule.';
   }
   if (candidate?.code === '42501') {
@@ -185,6 +196,35 @@ export async function getConversationWorkspace(
   });
   if (error) throw error;
   return conversationWorkspaceSchema.parse(data);
+}
+
+export async function getApplicationConversationState(
+  client: SupabaseClient<Database>,
+  applicationId: string,
+): Promise<{ canStart: boolean; conversationId: string | null }> {
+  const { data, error } = await client.rpc(
+    'get_application_conversation_state',
+    { p_application_id: applicationId },
+  );
+  if (error) throw error;
+  return z
+    .object({
+      canStart: z.boolean(),
+      conversationId: z.string().uuid().nullable(),
+    })
+    .parse(data);
+}
+
+export async function getOrCreateApplicationConversation(
+  client: SupabaseClient<Database>,
+  applicationId: string,
+): Promise<string> {
+  const { data, error } = await client.rpc(
+    'get_or_create_application_conversation',
+    { p_application_id: applicationId },
+  );
+  if (error) throw error;
+  return z.string().uuid().parse(data);
 }
 
 export async function listMessages(

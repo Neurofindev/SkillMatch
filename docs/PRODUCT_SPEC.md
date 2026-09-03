@@ -31,7 +31,7 @@ Il décrit un besoin, choisit le mode de mission, indique un budget informatif, 
 
 ### Talent / prestataire
 
-Il complète son profil et ses compétences, découvre des missions compatibles, candidate avec un message et éventuellement un montant informatif, échange après acceptation, accepte l’accord, réalise la mission, participe à la clôture et laisse un avis vérifié.
+Il complète son profil et ses compétences, découvre des missions compatibles, candidate avec un message et éventuellement un montant informatif, peut échanger avec le client dès la candidature reçue, accepte l’accord s’il est retenu, réalise la mission, participe à la clôture et laisse un avis vérifié.
 
 ### Compte à double capacité
 
@@ -46,7 +46,7 @@ Un même compte peut publier et candidater. L’interface peut adapter ses racco
 5. Candidature : le talent envoie un message, ses disponibilités et, s’il le souhaite, un montant proposé purement informatif.
 6. Présélection : le client compare les candidatures selon des critères utiles et non discriminatoires.
 7. Acceptation : le client accepte une candidature ; les autres candidatures passent dans un état final explicite.
-8. Match et conversation : l’acceptation crée le match et ouvre une conversation privée aux deux participants.
+8. Conversation et match : dès la candidature envoyée et reçue, ses deux participants peuvent ouvrir une conversation privée unique. Si la candidature est acceptée, cette même conversation est rattachée au match sans perdre son historique.
 9. Accord : les participants confirment le périmètre, le calendrier, le lieu ou mode, les responsabilités et les modalités de rémunération gérées hors SkillMatch.
 10. Réalisation : les participants utilisent des jalons simples et des messages, sans suivi financier ni promesse de garantie.
 11. Clôture : chaque participant confirme ou conteste la fin ; les désaccords peuvent être signalés.

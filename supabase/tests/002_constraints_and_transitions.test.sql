@@ -273,9 +273,10 @@ select throws_ok(
   'report target type must match its reference'
 );
 
-insert into public.conversations (id, match_id, mission_id)
+insert into public.conversations (id, application_id, match_id, mission_id)
 values (
   '60000000-0000-0000-0000-000000000001',
+  '20000000-0000-0000-0000-000000000001',
   '30000000-0000-0000-0000-000000000001',
   '10000000-0000-0000-0000-000000000001'
 );

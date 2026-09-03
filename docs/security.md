@@ -1,7 +1,7 @@
 # SkillMatch — modèle de menace et matrice d’autorisation
 
 Statut : référence implémentée et auditée jusqu’à la phase 12
-Date : 2026-09-01
+Date : 2026-09-03
 
 ## Modèle de menace
 
@@ -31,6 +31,7 @@ Menaces principales et contrôles :
 - candidature silencieuse ou usurpée : l’insertion directe est retirée au rôle authentifié et `submit_application` exige `auth.uid()`, un profil talent complet et une confirmation littérale ;
 - score discriminatoire ou manipulé dans le navigateur : le trigger PostgreSQL calcule `relevance-v1` sans identité, âge, photo, sexe, origine ni distance remote et conserve les facteurs sources ;
 - consultation horizontale d’une candidature : RLS et `list_applications` limitent chaque ligne au talent candidat ou au propriétaire de la mission et projettent seulement le profil public autorisé ;
+- création ou lecture d’une conversation avant match par un tiers : l’RPC verrouille une candidature réelle, dérive ses deux participants côté serveur, impose une conversation unique et RLS limite l’historique à ses membres ;
 - geste ambigu produisant une action finale : un swipe talent ne crée jamais de candidature, un swipe client « passer » ne refuse jamais, et seuls passer/comparer sont annulables automatiquement.
 - avis inventé, prématuré ou usurpé : l’insertion directe est révoquée ; `submit_review` dérive les deux participants du match clôturé, valide les notes et s’appuie sur une contrainte unique.
 - métrique de réputation ou classement trompeur : moyenne toujours accompagnée du volume, nouveau profil explicite, événements de clôture distincts et liste hebdomadaire vide sous le seuil documenté.
@@ -64,9 +65,9 @@ Risque résiduel : `service_role` et les propriétaires de base contournent RLS 
 | `swipes`                    | auteur                                                              | RPC talent uniquement                                                   |
 | `matches`                   | deux participants ou modération                                     | RPC d’acceptation uniquement                                            |
 | `agreements`                | deux participants ou modération                                     | confirmations/transitions par RPC uniquement                            |
-| `conversations`             | membres ou modération                                               | création par RPC d’acceptation uniquement                               |
+| `conversations`             | membres ou modération                                               | RPC candidature active ; rattachement au match par acceptation          |
 | `conversation_members`      | membres ou modération                                               | chaque membre modifie seulement son état de lecture/archivage           |
-| `messages`                  | membres ou modération                                               | membre auteur, match actif et absence de blocage                        |
+| `messages`                  | membres ou modération                                               | membre auteur, candidature ou match actif, absence de blocage           |
 | `mission_events`            | participants ou modération                                          | fonctions serveur uniquement ; journal append-only                      |
 | `completion_confirmations`  | participants ou modération                                          | participant sous sa propre identité                                     |
 | `notifications`             | destinataire ou modération                                          | destinataire : `read_at` seulement ; création serveur                   |
@@ -84,46 +85,48 @@ Une suspension ne supprime pas l’historique nécessaire aux participants. Elle
 
 ## RPC exposées
 
-| RPC                           | Rôle                                      | Garanties principales                                                                                                  |
-| ----------------------------- | ----------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| `accept_application`          | authentifié, propriétaire de mission      | verrou, versions, idempotence, un match, conversation et notifications atomiques                                       |
-| `transition_application`      | candidat/propriétaire                     | retrait ou revue seulement, jamais acceptation                                                                         |
-| `transition_mission`          | propriétaire/participant selon transition | versions, autorité, audit, double confirmation avant fin                                                               |
-| `confirm_agreement`           | participant                               | confirmation distincte, verrouillée, idempotente et auditée                                                            |
-| `transition_agreement`        | participant                               | seulement après confirmations et état cohérent du match                                                                |
-| `get_public_profiles`         | anonyme/authentifié                       | projection de colonnes explicitement publiables                                                                        |
-| `get_application_counts`      | propriétaire authentifié                  | agrégation des candidatures de ses missions                                                                            |
-| `get_unread_counts`           | authentifié                               | notifications et messages non lus calculés                                                                             |
-| `get_dashboard_stats`         | authentifié                               | statistiques issues des données du compte                                                                              |
-| `get_reputation`              | anonyme/authentifié                       | moyenne réelle, score normalisé et volumes sources                                                                     |
-| `get_weekly_ranking`          | authentifié                               | événements de fin réels sur sept jours, formule versionnée                                                             |
-| `submit_review`               | participant                               | auteur/destinataire dérivés, clôture exigée, notes bornées et unicité                                                  |
-| `list_review_opportunities`   | participant                               | collaborations terminées appartenant à l’appelant uniquement                                                           |
-| `list_received_reviews`       | anonyme/authentifié                       | avis publics paginés et identité publique minimale                                                                     |
-| `get_reputation_summary`      | anonyme/authentifié                       | moyenne, volume, distribution, missions terminées et état nouveau profil                                               |
-| `get_dashboard_overview`      | authentifié                               | agrégats limités au compte et adaptés à ses capacités                                                                  |
-| `list_dashboard_deadlines`    | authentifié                               | échéances des matches actifs de l’appelant uniquement                                                                  |
-| `is_username_available`       | authentifié                               | normalisation et unicité insensible à la casse, sans exposer les profils privés                                        |
-| `find_or_create_skill`        | authentifié                               | longueur/texte validés, normalisation serveur, déduplication, maximum 30 créations par 24 h et aucune écriture directe |
-| `save_profile`                | propriétaire authentifié                  | profil, compétences et disponibilité validés et remplacés atomiquement                                                 |
-| `save_mission`                | propriétaire avec capacité publier        | mission/compétences/fichiers atomiques, version et publication validée                                                 |
-| `archive_mission`             | propriétaire                              | version optimiste et statuts archivables seulement                                                                     |
-| `search_missions`             | authentifié                               | projection paginée, agrégée, bloquée et sans distance pour remote                                                      |
-| `submit_application`          | talent authentifié                        | confirmation explicite, identité serveur, doublon/auto-candidature/blocage refusés                                     |
-| `list_applications`           | candidat/propriétaire                     | projection paginée limitée aux parties, score stocké et profil public                                                  |
-| `record_mission_swipe`        | talent authentifié                        | passer/enregistrer/intéressé persisté ; aucune candidature créée                                                       |
-| `undo_last_mission_swipe`     | talent authentifié                        | annule seulement sa dernière décision et le favori créé par ce parcours                                                |
-| `record_application_swipe`    | propriétaire de mission                   | passer/comparer sans statut final, maximum trois comparaisons, version optimiste                                       |
-| `undo_last_application_swipe` | propriétaire de mission                   | annule la dernière décision passer/comparer encore réversible                                                          |
-| `submit_report`               | authentifié actif                         | cible accessible, confirmation, bornes, déduplication et cadence                                                       |
-| `set_profile_block`           | authentifié actif                         | identité serveur, cible distincte, verrou commun et écriture contrôlée                                                 |
-| `list_blocked_profiles`       | authentifié                               | blocages de l’appelant et identité publique minimale                                                                   |
-| `get_moderation_access`       | authentifié                               | booléen dérivé exclusivement de `user_roles`                                                                           |
-| `list_moderation_reports`     | modérateur                                | file paginée, projection limitée et refus `42501` au rôle normal                                                       |
-| `get_moderation_report`       | modérateur                                | cible limitée sans Auth, e-mail ni localisation exacte                                                                 |
-| `moderate_report`             | modérateur                                | verrou, version, transition, masquage/suspension et audit atomiques                                                    |
-| `get_account_export`          | authentifié                               | export allow-listé des données de l’appelant                                                                           |
-| `request_account_deletion`    | authentifié                               | confirmation exacte et demande persistée sans faux succès d’effacement                                                 |
+| RPC                                      | Rôle                                      | Garanties principales                                                                                                  |
+| ---------------------------------------- | ----------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `accept_application`                     | authentifié, propriétaire de mission      | verrou, versions, idempotence, un match, conversation et notifications atomiques                                       |
+| `get_or_create_application_conversation` | candidat/propriétaire                     | candidature réelle active, paire dérivée, blocage, unicité et exactement deux membres                                  |
+| `get_application_conversation_state`     | candidat/propriétaire                     | existence et disponibilité projetées sans ouvrir l’accès à un tiers                                                    |
+| `transition_application`                 | candidat/propriétaire                     | retrait ou revue seulement, jamais acceptation                                                                         |
+| `transition_mission`                     | propriétaire/participant selon transition | versions, autorité, audit, double confirmation avant fin                                                               |
+| `confirm_agreement`                      | participant                               | confirmation distincte, verrouillée, idempotente et auditée                                                            |
+| `transition_agreement`                   | participant                               | seulement après confirmations et état cohérent du match                                                                |
+| `get_public_profiles`                    | anonyme/authentifié                       | projection de colonnes explicitement publiables                                                                        |
+| `get_application_counts`                 | propriétaire authentifié                  | agrégation des candidatures de ses missions                                                                            |
+| `get_unread_counts`                      | authentifié                               | notifications et messages non lus calculés                                                                             |
+| `get_dashboard_stats`                    | authentifié                               | statistiques issues des données du compte                                                                              |
+| `get_reputation`                         | anonyme/authentifié                       | moyenne réelle, score normalisé et volumes sources                                                                     |
+| `get_weekly_ranking`                     | authentifié                               | événements de fin réels sur sept jours, formule versionnée                                                             |
+| `submit_review`                          | participant                               | auteur/destinataire dérivés, clôture exigée, notes bornées et unicité                                                  |
+| `list_review_opportunities`              | participant                               | collaborations terminées appartenant à l’appelant uniquement                                                           |
+| `list_received_reviews`                  | anonyme/authentifié                       | avis publics paginés et identité publique minimale                                                                     |
+| `get_reputation_summary`                 | anonyme/authentifié                       | moyenne, volume, distribution, missions terminées et état nouveau profil                                               |
+| `get_dashboard_overview`                 | authentifié                               | agrégats limités au compte et adaptés à ses capacités                                                                  |
+| `list_dashboard_deadlines`               | authentifié                               | échéances des matches actifs de l’appelant uniquement                                                                  |
+| `is_username_available`                  | authentifié                               | normalisation et unicité insensible à la casse, sans exposer les profils privés                                        |
+| `find_or_create_skill`                   | authentifié                               | longueur/texte validés, normalisation serveur, déduplication, maximum 30 créations par 24 h et aucune écriture directe |
+| `save_profile`                           | propriétaire authentifié                  | profil, compétences et disponibilité validés et remplacés atomiquement                                                 |
+| `save_mission`                           | propriétaire avec capacité publier        | mission/compétences/fichiers atomiques, version et publication validée                                                 |
+| `archive_mission`                        | propriétaire                              | version optimiste et statuts archivables seulement                                                                     |
+| `search_missions`                        | authentifié                               | projection paginée, agrégée, bloquée et sans distance pour remote                                                      |
+| `submit_application`                     | talent authentifié                        | confirmation explicite, identité serveur, doublon/auto-candidature/blocage refusés                                     |
+| `list_applications`                      | candidat/propriétaire                     | projection paginée limitée aux parties, score stocké et profil public                                                  |
+| `record_mission_swipe`                   | talent authentifié                        | passer/enregistrer/intéressé persisté ; aucune candidature créée                                                       |
+| `undo_last_mission_swipe`                | talent authentifié                        | annule seulement sa dernière décision et le favori créé par ce parcours                                                |
+| `record_application_swipe`               | propriétaire de mission                   | passer/comparer sans statut final, maximum trois comparaisons, version optimiste                                       |
+| `undo_last_application_swipe`            | propriétaire de mission                   | annule la dernière décision passer/comparer encore réversible                                                          |
+| `submit_report`                          | authentifié actif                         | cible accessible, confirmation, bornes, déduplication et cadence                                                       |
+| `set_profile_block`                      | authentifié actif                         | identité serveur, cible distincte, verrou commun et écriture contrôlée                                                 |
+| `list_blocked_profiles`                  | authentifié                               | blocages de l’appelant et identité publique minimale                                                                   |
+| `get_moderation_access`                  | authentifié                               | booléen dérivé exclusivement de `user_roles`                                                                           |
+| `list_moderation_reports`                | modérateur                                | file paginée, projection limitée et refus `42501` au rôle normal                                                       |
+| `get_moderation_report`                  | modérateur                                | cible limitée sans Auth, e-mail ni localisation exacte                                                                 |
+| `moderate_report`                        | modérateur                                | verrou, version, transition, masquage/suspension et audit atomiques                                                    |
+| `get_account_export`                     | authentifié                               | export allow-listé des données de l’appelant                                                                           |
+| `request_account_deletion`               | authentifié                               | confirmation exacte et demande persistée sans faux succès d’effacement                                                 |
 
 ## Effet d’un blocage
 
@@ -131,15 +134,15 @@ Le blocage est symétrique pour les nouvelles interactions, quel que soit son au
 
 ## Storage
 
-| Bucket                | Lecture                    | Écriture                                                               | Limites                         |
-| --------------------- | -------------------------- | ---------------------------------------------------------------------- | ------------------------------- |
-| `avatars`             | publique                   | `<auth.uid()>/avatar.webp` uniquement                                  | JPEG/PNG/WebP, 2 Mio            |
-| `message-attachments` | membres de la conversation | `<conversation-id>/<auth.uid()>/<filename>`, match actif et non bloqué | JPEG/PNG/WebP/PDF/texte, 10 Mio |
-| `mission-attachments` | propriétaire uniquement    | `<auth.uid()>/<draft-ou-mission>/<nom-sûr>`                            | 3 fichiers, types sûrs, 5 Mio   |
+| Bucket                | Lecture                    | Écriture                                                                              | Limites                         |
+| --------------------- | -------------------------- | ------------------------------------------------------------------------------------- | ------------------------------- |
+| `avatars`             | publique                   | `<auth.uid()>/avatar.webp` uniquement                                                 | JPEG/PNG/WebP, 2 Mio            |
+| `message-attachments` | membres de la conversation | `<conversation-id>/<auth.uid()>/<filename>`, candidature ou match actif et non bloqué | JPEG/PNG/WebP/PDF/texte, 10 Mio |
+| `mission-attachments` | propriétaire uniquement    | `<auth.uid()>/<draft-ou-mission>/<nom-sûr>`                                           | 3 fichiers, types sûrs, 5 Mio   |
 
 Le client refuse les autres types, limite l’entrée à 8 Mio, redimensionne au plus à 1 024 px et compresse en WebP avant l’upload maximal de 2 Mio. Le chemin déterministe permet le remplacement sans accumuler d’anciens fichiers ; la suppression est cohérente avec les policies propriétaire. Les suppressions de pièces jointes privées restent permises au propriétaire membre, y compris après blocage, afin qu’il puisse retirer son propre fichier. Aucun type exécutable n’est autorisé.
 
-Un chemin difficile à deviner n’est jamais considéré comme une autorisation. Les buckets privés exigent l’appartenance RLS, le préfixe possédé et, pour un message, un match actif sans blocage. Les buckets imposent leurs limites MIME/taille en plus des contrôles client. Les métadonnées persistées se limitent au nom nettoyé, type MIME, taille, chemin et relation utile ; la suppression est autorisée uniquement au propriétaire concerné.
+Un chemin difficile à deviner n’est jamais considéré comme une autorisation. Les buckets privés exigent l’appartenance RLS, le préfixe possédé et, pour un message, une candidature active ou un match actif sans blocage. Les buckets imposent leurs limites MIME/taille en plus des contrôles client. Les métadonnées persistées se limitent au nom nettoyé, type MIME, taille, chemin et relation utile ; la suppression est autorisée uniquement au propriétaire concerné.
 
 ## Export, suppression et conservation
 
@@ -186,16 +189,16 @@ La timeline expose aux participants uniquement des métadonnées sobres : type, 
 
 ## Autorité ajoutée en phase 08
 
-| Surface             | Autorité                                                                      | Protection                                                                                                                                              |
-| ------------------- | ----------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Liste et lecture    | `list_conversations`, `get_conversation_workspace`, `list_messages`           | identité `auth.uid()`, appartenance à `conversation_members`, projections à colonnes autorisées et pagination par curseur                               |
-| Envoi               | `send_message`                                                                | insertion directe révoquée, identité serveur, match actif, verrou de paire, blocage symétrique, cadence 5/10 s et 30/min, identifiant client idempotent |
-| Pièce jointe        | Storage privé + `send_message`                                                | chemin `<conversation>/<auteur>/<uuid>.<extension>`, bucket, existence, MIME fermé, taille ≤ 10 Mio et nom visible nettoyé                              |
-| Lecture/archivage   | `mark_conversation_read`, `set_conversation_archived`                         | mutation du seul membre courant ; non-lus dérivés des messages réels                                                                                    |
-| Suppression         | `delete_message`                                                              | auteur uniquement ; contenu et métadonnées de fichier masqués dans la projection, historique de suppression conservé                                    |
-| Blocage/signalement | `set_conversation_block`, `report_conversation_participant`                   | cible dérivée du match, blocage appliqué aux écritures dans les deux sens, signalement privé sous identité serveur                                      |
-| Notifications       | `list_notifications`, `mark_notification_read`, `mark_all_notifications_read` | destinataire uniquement, chemin normalisé puis autorisé selon la ressource, création de message unique par source                                       |
-| Realtime            | publication `messages` et `notifications`                                     | RLS appliquée, abonnement frontend filtré à la conversation courante ou au destinataire, suppression du canal au démontage                              |
+| Surface             | Autorité                                                                      | Protection                                                                                                                                                             |
+| ------------------- | ----------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Liste et lecture    | `list_conversations`, `get_conversation_workspace`, `list_messages`           | identité `auth.uid()`, appartenance à `conversation_members`, projections à colonnes autorisées et pagination par curseur                                              |
+| Envoi               | `send_message`                                                                | insertion directe révoquée, identité serveur, candidature ou match actif, verrou de paire, blocage symétrique, cadence 5/10 s et 30/min, identifiant client idempotent |
+| Pièce jointe        | Storage privé + `send_message`                                                | chemin `<conversation>/<auteur>/<uuid>.<extension>`, bucket, existence, MIME fermé, taille ≤ 10 Mio et nom visible nettoyé                                             |
+| Lecture/archivage   | `mark_conversation_read`, `set_conversation_archived`                         | mutation du seul membre courant ; non-lus dérivés des messages réels                                                                                                   |
+| Suppression         | `delete_message`                                                              | auteur uniquement ; contenu et métadonnées de fichier masqués dans la projection, historique de suppression conservé                                                   |
+| Blocage/signalement | `set_conversation_block`, `report_conversation_participant`                   | cible dérivée de la candidature, blocage appliqué aux écritures dans les deux sens, signalement privé sous identité serveur                                            |
+| Notifications       | `list_notifications`, `mark_notification_read`, `mark_all_notifications_read` | destinataire uniquement, chemin normalisé puis autorisé selon la ressource, création de message unique par source                                                      |
+| Realtime            | publication `messages` et `notifications`                                     | RLS appliquée, abonnement frontend filtré à la conversation courante ou au destinataire, suppression du canal au démontage                                             |
 
 `messages` et `notifications` utilisent `replica identity full` afin que les mises à jour autorisées restent cohérentes. Le temps réel sert d’invalidation et ne devient jamais une source de vérité ; une actualisation périodique bornée assure le repli. Une notification de nouveau message ne contient pas son corps. Aucun type, lien ou texte financier n’existe.
 

@@ -22,6 +22,7 @@ import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { EmptyState, ErrorState } from '@/components/ui/FeedbackStates';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { useToast } from '@/components/ui/Toast';
+import { getApplicationEligibility } from '@/features/applications/applicationEligibility';
 import {
   getFrenchMissionError,
   missionQueryKeys,
@@ -156,6 +157,10 @@ export function MissionDetailPage() {
   }
 
   const isOwner = mission.owner.id === auth.user?.id;
+  const applicationEligibility = getApplicationEligibility(mission, {
+    canWork: Boolean(auth.profile?.canWork),
+    id: auth.user?.id ?? '',
+  });
   const avatarUrl = client
     ? getAvatarPublicUrl(client, mission.owner.avatarPath)
     : undefined;
@@ -191,12 +196,20 @@ export function MissionDetailPage() {
                 : 'Ajouter aux favoris'}
             </Button>
           ) : null}
-          {!isOwner && ['published', 'selecting'].includes(mission.status) ? (
+          {applicationEligibility.allowed ? (
             <Link
               className="button button-primary"
               to={`/espace/missions/${mission.id}/candidature`}
             >
               <Send aria-hidden="true" size={18} /> Candidater
+            </Link>
+          ) : null}
+          {applicationEligibility.reason === 'work-capability-required' ? (
+            <Link
+              className="button button-primary"
+              to="/espace/profil#capacites"
+            >
+              Activer « trouver une mission »
             </Link>
           ) : null}
           <Button onClick={() => void share()} variant="secondary">

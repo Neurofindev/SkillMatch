@@ -247,6 +247,47 @@ if (application.error || !application.data[0]) {
   throw application.error ?? new Error('Candidature absente.');
 }
 const applicationId = application.data[0].application_id;
+const startedByTalent = await talentAccount.client.rpc(
+  'get_or_create_application_conversation',
+  { p_application_id: applicationId },
+);
+if (startedByTalent.error || !startedByTalent.data) {
+  throw (
+    startedByTalent.error ?? new Error('Conversation de candidature absente.')
+  );
+}
+const conversationBeforeAcceptance = startedByTalent.data;
+const openedByClient = await clientAccount.client.rpc(
+  'get_or_create_application_conversation',
+  { p_application_id: applicationId },
+);
+if (
+  openedByClient.error ||
+  openedByClient.data !== conversationBeforeAcceptance
+) {
+  throw (
+    openedByClient.error ??
+    new Error('Le client n’a pas reçu la même conversation unique.')
+  );
+}
+for (const [account, body] of [
+  [talentAccount, `Message talent avant acceptation ${suffix}`],
+  [clientAccount, `Réponse client avant acceptation ${suffix}`],
+]) {
+  const sent = await account.client.rpc('send_message', {
+    p_body: body,
+    p_client_message_id: randomUUID(),
+    p_conversation_id: conversationBeforeAcceptance,
+  });
+  if (sent.error) throw sent.error;
+}
+const outsiderOpen = await thirdAccount.client.rpc(
+  'get_or_create_application_conversation',
+  { p_application_id: applicationId },
+);
+if (outsiderOpen.error?.code !== '42501') {
+  throw new Error('Le tiers a pu ouvrir la conversation de candidature.');
+}
 let applicationVersion = application.data[0].lock_version;
 for (const status of ['viewed', 'shortlisted']) {
   const transitioned = await clientAccount.client.rpc(
@@ -277,6 +318,11 @@ if (accepted.error || !accepted.data[0]) {
   throw accepted.error ?? new Error('Acceptation absente.');
 }
 const conversationId = accepted.data[0].conversation_id;
+if (conversationId !== conversationBeforeAcceptance) {
+  throw new Error(
+    'L’acceptation a remplacé la conversation au lieu de la réutiliser.',
+  );
+}
 
 const browser = await chromium.launch({ headless: true });
 try {
@@ -480,6 +526,9 @@ try {
   await talentContext.close();
   console.log(
     'Trois comptes confirmés localement : client, talent et tiers de contrôle.',
+  );
+  console.log(
+    'Conversation ouverte par les deux parties avant acceptation puis réutilisée par le match.',
   );
   console.log(
     'Temps réel bidirectionnel observé sans doublon ; persistance après rechargement validée.',

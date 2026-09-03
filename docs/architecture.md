@@ -96,7 +96,7 @@ Les noms exacts seront figés par migrations. Entités prévues :
 - applications : mission, talent, message, disponibilité, montant proposé informatif et statut ;
 - matches : candidature acceptée et deux participants ;
 - agreement_versions et agreement_confirmations : instantanés versionnés, confirmation des deux parties et mention zéro paiement ;
-- conversations, conversation_members et messages : accès limité aux participants du match ;
+- conversations, conversation_members et messages : accès limité aux deux participants d’une candidature réelle, puis du match si elle est acceptée ;
 - mission_events : transitions métier auditables sans contenu sensible inutile ;
 - completion_confirmations : confirmations ou contestations des deux participants ;
 - reviews : mission clôturée, auteur, destinataire, note et texte ;
@@ -112,7 +112,7 @@ Il n’existe aucune table Wallet, balance, payment, transaction, invoice, withd
 - Le propriétaire d’une mission ne peut candidater à sa propre mission.
 - Une seule candidature peut être accepted par mission ; l’opération est transactionnelle.
 - Un match référence cette candidature acceptée et ne peut être dupliqué.
-- Une conversation de mission n’est lisible que par les membres du match.
+- Une conversation de candidature n’est lisible que par ses deux membres autorisés ; elle est réutilisée par le match si la candidature est acceptée.
 - Une confirmation d’accord est unique par version et participant.
 - Un avis est unique par mission/auteur/destinataire et exige une mission closed avec auteur et destinataire participants.
 - Les valeurs budget et proposed_amount sont informatives et n’entraînent aucune action financière.
@@ -353,7 +353,7 @@ Les helpers d’autorisation sont dans le schéma non exposé `private`. Les hel
 1. accepte la candidature choisie ;
 2. rejette les autres candidatures encore ouvertes ;
 3. affecte le talent et passe la mission à `assigned` ;
-4. crée le match unique, la conversation et exactement deux membres ;
+4. crée le match unique, puis crée ou réutilise la conversation de candidature avec exactement deux membres ;
 5. ajoute l’événement d’audit et les notifications.
 
 Un retry de la même candidature retourne le résultat existant. Deux candidatures concurrentes sont sérialisées par le verrou de ligne ; les index uniques restent une seconde défense. Le harnais `db:test:concurrency` utilise deux connexions réelles et vérifie qu’une seule transaction gagne sans état partiel.
@@ -497,18 +497,18 @@ Date : 2026-08-30
 
 Les transitions historiques génériques restent compatibles avec les phases antérieures, mais des triggers empêchent désormais de démarrer, terminer ou annuler un match assigné en dehors des RPC couplées. TanStack Query ne fait que lire et invalider les projections `list_match_workspaces` et `get_match_workspace`. Les actions sensibles n’utilisent aucune mutation optimiste.
 
-La conversation est créée et accessible depuis le suivi, mais son interface complète, le Realtime et une éventuelle négociation de versions ultérieures restent au Prompt 08.
+La conversation est accessible depuis le suivi ; ADR-0013 permet désormais de l’ouvrir dès la candidature réelle, avant l’éventuel match. Son interface complète et le Realtime sont livrés par la phase 08.
 
 ---
 
 # ADR-0009 — Messagerie idempotente, Realtime filtré et notifications réelles de phase 08
 
-Statut : accepté et implémenté
+Statut : remplacé partiellement par ADR-0013 pour le moment de création
 Date : 2026-08-31
 
 ## Décision
 
-- La conversation continue d’être créée uniquement par `accept_application`. Il n’existe ni annuaire de messages ni création publique de conversation.
+- Décision d’origine : la conversation était créée uniquement par `accept_application`. ADR-0013 remplace ce point sans créer d’annuaire public.
 - `send_message` est l’unique écriture de message exposée. Elle dérive l’auteur de `auth.uid()`, verrouille l’émetteur et la conversation, refuse match inactif et blocage, limite la cadence et déduplique avec `client_message_id`.
 - Les messages sont chargés par curseur `(created_at, id)`. Le frontend fusionne le résultat serveur, l’envoi optimiste et Realtime par identifiants serveur/client ; un retry conserve le même identifiant.
 - Realtime est publié uniquement sur `messages` et `notifications`. L’écran courant souscrit avec un filtre de conversation ou de destinataire, retire le canal au changement/démontage et garde PostgreSQL comme vérité avec un refetch périodique.
@@ -587,3 +587,24 @@ Les offres gratuites sont une contrainte d’exploitation : pause possible du pr
 ## État d’exécution
 
 Aucun accès Cloudflare ou Supabase Cloud authentifié n’était disponible. La procédure, le build et les contrôles locaux sont validés ; la publication externe, l’URL, les e-mails externes et l’observation HTTP des en-têtes restent non exécutés. Cette limite empêche une qualification « prêt pour ouverture publique » sans invalider l’architecture livrée.
+
+---
+
+# ADR-0013 — Conversation privée dès la candidature réelle
+
+Statut : accepté et implémenté
+Date : 2026-09-03
+
+## Décision
+
+Une conversation appartient désormais à une candidature réelle avec une contrainte unique sur `application_id`. Elle peut être créée de manière idempotente par le talent candidat ou le propriétaire de la mission dès que la candidature est dans un état actif (`submitted`, `viewed` ou `shortlisted`). Il n’existe toujours ni annuaire public, ni conversation arbitraire entre profils.
+
+`get_or_create_application_conversation` verrouille la candidature, dérive les deux participants depuis PostgreSQL, vérifie profils actifs et blocage, puis crée exactement la conversation et ses deux membres. `get_application_conversation_state` permet à l’interface d’afficher l’action seulement lorsqu’une conversation existe déjà ou peut réellement être créée.
+
+L’écriture est autorisée tant que la candidature et sa mission restent actives. Un refus ou retrait conserve l’historique pour les deux membres mais rend la conversation en lecture seule. Si la candidature est acceptée, `accept_application` rattache le match à la conversation existante au lieu d’en créer une autre ; l’état actif du match devient alors l’autorité d’écriture.
+
+## Conséquences
+
+`conversations.match_id` devient facultatif avant sélection, tandis que `application_id` est obligatoire et unique. Les vues de messagerie, le blocage, le signalement, les pièces jointes et les triggers dérivent leurs participants depuis la candidature ; la protection RLS par `conversation_members` reste inchangée. Les notifications ne sont créées qu’à partir d’un message réellement persisté, jamais lors de l’ouverture d’une conversation vide.
+
+Les tests PostgreSQL couvrent les deux participants, le tiers, l’unicité, la lecture seule après retrait et la réutilisation après acceptation. Le harnais Realtime confirme en plus, avec trois comptes Auth réels, que les messages antérieurs à l’acceptation persistent dans la même conversation.

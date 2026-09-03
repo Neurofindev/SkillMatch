@@ -424,27 +424,37 @@ export type Database = {
       };
       conversations: {
         Row: {
+          application_id: string;
           created_at: string;
           id: string;
-          match_id: string;
+          match_id: string | null;
           mission_id: string;
           updated_at: string;
         };
         Insert: {
+          application_id: string;
           created_at?: string;
           id?: string;
-          match_id: string;
+          match_id?: string | null;
           mission_id: string;
           updated_at?: string;
         };
         Update: {
+          application_id?: string;
           created_at?: string;
           id?: string;
-          match_id?: string;
+          match_id?: string | null;
           mission_id?: string;
           updated_at?: string;
         };
         Relationships: [
+          {
+            foreignKeyName: 'conversations_application_mission_fk';
+            columns: ['application_id', 'mission_id'];
+            isOneToOne: false;
+            referencedRelation: 'applications';
+            referencedColumns: ['id', 'mission_id'];
+          },
           {
             foreignKeyName: 'conversations_match_mission_fk';
             columns: ['match_id', 'mission_id'];
@@ -1596,6 +1606,10 @@ export type Database = {
         }[];
       };
       get_account_export: { Args: never; Returns: Json };
+      get_application_conversation_state: {
+        Args: { p_application_id: string };
+        Returns: Json;
+      };
       get_application_counts: {
         Args: never;
         Returns: {
@@ -1644,6 +1658,10 @@ export type Database = {
       get_match_workspace: { Args: { p_match_id: string }; Returns: Json };
       get_moderation_access: { Args: never; Returns: boolean };
       get_moderation_report: { Args: { p_report_id: string }; Returns: Json };
+      get_or_create_application_conversation: {
+        Args: { p_application_id: string };
+        Returns: string;
+      };
       get_public_profiles: {
         Args: { p_profile_id?: string };
         Returns: {

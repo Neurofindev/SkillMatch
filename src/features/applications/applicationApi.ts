@@ -203,8 +203,32 @@ export function getFrenchApplicationError(error: unknown): string {
   if (message.includes('own mission')) {
     return 'Vous ne pouvez pas candidater à votre propre mission.';
   }
+  if (message.includes('active work capability')) {
+    return 'Activez « trouver une mission » dans votre profil avant de candidater.';
+  }
   if (message.includes('deadline')) {
     return 'L’échéance de candidature est dépassée.';
+  }
+  if (message.includes('application limit')) {
+    return 'Cette mission a atteint sa limite de candidatures.';
+  }
+  if (
+    message.includes('discoverable mission') ||
+    message.includes('visible mission')
+  ) {
+    return 'Cette mission n’accepte plus de nouvelles candidatures.';
+  }
+  if (message.includes('explicit application confirmation')) {
+    return 'Confirmez explicitement l’envoi de cette candidature.';
+  }
+  if (message.includes('invalid application content')) {
+    return 'Vérifiez le message, la disponibilité et la proposition avant de recommencer.';
+  }
+  if (message.includes('block prevents')) {
+    return 'Cette interaction n’est pas disponible en raison d’un blocage.';
+  }
+  if (message.includes('active profiles are required')) {
+    return 'Cette candidature n’est pas disponible pour l’un de ces profils.';
   }
   if (message.includes('three applications')) {
     return 'La comparaison est limitée à trois candidatures.';

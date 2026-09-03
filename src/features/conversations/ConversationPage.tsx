@@ -528,12 +528,21 @@ export function ConversationPage() {
           >
             <FileText aria-hidden="true" size={18} /> Mission
           </Link>
-          <Link
-            className="button button-secondary"
-            to={`/espace/matches/${workspace.match.id}`}
-          >
-            Accord et suivi
-          </Link>
+          {workspace.match ? (
+            <Link
+              className="button button-secondary"
+              to={`/espace/matches/${workspace.match.id}`}
+            >
+              Accord et suivi
+            </Link>
+          ) : (
+            <Link
+              className="button button-secondary"
+              to={`/espace/candidatures/${workspace.application.id}`}
+            >
+              Candidature
+            </Link>
+          )}
         </div>
       </header>
 
@@ -602,8 +611,9 @@ export function ConversationPage() {
         </div>
       ) : !workspace.conversation.canSend ? (
         <div className="status-banner" role="status">
-          Cette collaboration est terminée ou annulée : la conversation est en
-          lecture seule.
+          {workspace.match
+            ? 'Cette collaboration est terminée ou annulée : la conversation est en lecture seule.'
+            : 'Cette candidature est retirée ou refusée : la conversation reste consultable en lecture seule.'}
         </div>
       ) : null}
 
@@ -643,7 +653,7 @@ export function ConversationPage() {
         >
           {!messages.length ? (
             <EmptyState
-              description="Écrivez le premier message de cette collaboration."
+              description="Écrivez le premier message au sujet de cette candidature."
               icon={<MessageCircle />}
               title="Aucun message"
             />

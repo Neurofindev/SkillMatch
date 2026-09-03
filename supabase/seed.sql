@@ -307,9 +307,10 @@ values (
   'd0000000-0000-0000-0000-000000000002'
 );
 
-insert into public.conversations (id, match_id, mission_id)
+insert into public.conversations (id, application_id, match_id, mission_id)
 values (
   'd4000000-0000-0000-0000-000000000001',
+  'd2000000-0000-0000-0000-000000000003',
   'd3000000-0000-0000-0000-000000000001',
   'd1000000-0000-0000-0000-000000000003'
 );
