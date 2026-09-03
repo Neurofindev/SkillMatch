@@ -1,8 +1,8 @@
 # SkillMatch — état final du projet
 
-Dernière mise à jour : 2026-09-02
+Dernière mise à jour : 2026-09-03
 Phase courante : 12 — documentation, déploiement gratuit et audit final
-État : validée et déployée ; recette externe partielle
+État : validée localement ; migration cloud appliquée, frontend en attente de publication GitHub
 
 ## Terminé
 
@@ -15,6 +15,8 @@ Phase courante : 12 — documentation, déploiement gratuit et audit final
 - Deux défauts découverts pendant l’audit ont été corrigés : timeout trop court sur les routes lazy et perte possible d’une saisie très rapide au premier écran du wizard mission.
 - La régression de reprise de l’onboarding publiée le 2 septembre a été corrigée : le brouillon attend désormais la restauration effective de la session.
 - La publication de mission est désormais visible sur mobile et depuis l’en-tête applicatif ; un compte sans capacité client est guidé vers l’activation avant d’ouvrir le wizard. Les compétences sont saisies librement par les utilisateurs et seulement normalisées en interne pour le matching.
+- Une candidature refusée par la capacité `can_work` affiche désormais une explication exploitable et guide vers l’activation de « trouver une mission » au lieu du message générique sur l’état.
+- Une conversation privée unique peut être ouverte par le talent ou le client dès qu’une candidature réelle est envoyée et reçue. Elle devient lisible seule après refus/retrait et le même historique est réutilisé si la candidature est acceptée.
 
 ## Résultats exacts
 
@@ -22,10 +24,11 @@ Phase courante : 12 — documentation, déploiement gratuit et audit final
 - `npm audit --audit-level=high` : 0 vulnérabilité.
 - `npm run verify:full` : succès, code 0.
 - TypeScript/ESLint : 0 erreur, 0 avertissement.
-- Vitest : 29 fichiers, 77 tests réussis, 0 échec, 0 ignoré.
-- Base : 16 migrations rejouées, 3 buckets, lint sans problème et 2 smoke tests réussis.
-- pgTAP : 11 fichiers, 481 assertions réussies, 0 échec.
+- Vitest : 31 fichiers, 88 tests réussis, 0 échec, 0 ignoré.
+- Base : 17 migrations rejouées, 3 buckets et lint sans problème.
+- pgTAP : 12 fichiers, 500 assertions réussies, 0 échec.
 - Concurrence : 1 acceptation, 1 rejet, 1 match, 1 conversation, 1 accord, 2 membres.
+- Harnais messagerie : 3 comptes Auth confirmés ; conversation créée par les deux parties avant acceptation, messages persistés, même conversation après acceptation, accès tiers refusé `42501`, Realtime sans doublon, clavier et 320 px validés.
 - Harnais persistés : 7 parcours applicatifs multi-comptes plus 1 test de concurrence, couvrant Auth/onboarding, missions, candidatures, match/accord, Realtime, avis/dashboard et modération.
 - Playwright : 162 scénarios, 152 réussis, 10 ignorés intentionnellement, 0 échec, 6 viewports.
 - Axe : 36 scans publics et 1 scan modérateur authentifié, aucune violation critique ou sérieuse.
@@ -45,11 +48,12 @@ Phase courante : 12 — documentation, déploiement gratuit et audit final
 ## Déploiement
 
 - Supabase local : exécuté et validé.
-- Supabase Cloud : projet `omsrvbgurjfpqqompacp` lié, 16 migrations alignées et lint local sans erreur.
+- Supabase Cloud : projet `omsrvbgurjfpqqompacp` lié, 17 migrations alignées et lint local sans erreur.
 - Auth : SMTP Brevo actif, cinq modèles transactionnels français enregistrés, URL du site et trois retours exacts autorisés.
 - Cloudflare Pages : projet `skillmatch`, branche `main`, déploiements automatiques activés.
 - URL de production : [https://skillmatch-wo9.pages.dev](https://skillmatch-wo9.pages.dev).
-- Révision fonctionnelle déployée vérifiée : `0677183e70dc2dc71dd0ad68862c46bd38ca8dff`.
+- Révision fonctionnelle actuellement déployée vérifiée : `0677183e70dc2dc71dd0ad68862c46bd38ca8dff`.
+- Révision locale validée en attente de publication : `7cf6f7e`.
 
 ## Décision de sortie
 
