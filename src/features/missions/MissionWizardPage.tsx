@@ -46,6 +46,7 @@ import {
 import {
   BUDGET_MODELS,
   defaultMissionValues,
+  getTodayIsoDate,
   MISSION_CATEGORIES,
   missionFormSchema,
   missionStepFields,
@@ -112,6 +113,7 @@ export function MissionWizardPage() {
     shouldFocusError: true,
   });
   const values = useWatch({ control: form.control }) as MissionFormValues;
+  const today = getTodayIsoDate();
 
   const catalogQuery = useQuery({
     enabled: Boolean(client),
@@ -616,6 +618,7 @@ export function MissionWizardPage() {
               {(props) => (
                 <Input
                   {...props}
+                  min={today}
                   type="date"
                   {...form.register('applicationDeadline')}
                 />
@@ -631,6 +634,7 @@ export function MissionWizardPage() {
                 {(props) => (
                   <Input
                     {...props}
+                    min={values.applicationDeadline || today}
                     type="date"
                     {...form.register('startsOn')}
                   />
@@ -643,7 +647,12 @@ export function MissionWizardPage() {
                 required
               >
                 {(props) => (
-                  <Input {...props} type="date" {...form.register('endsOn')} />
+                  <Input
+                    {...props}
+                    min={values.startsOn || values.applicationDeadline || today}
+                    type="date"
+                    {...form.register('endsOn')}
+                  />
                 )}
               </FormField>
             </div>
